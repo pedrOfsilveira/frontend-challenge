@@ -15,6 +15,8 @@ if (import.meta.env.VITE_ENABLE_MOCKS === 'true') {
 
 const queryClient = createQueryClient()
 const router = createAppRouter(queryClient)
+// Só em desenvolvimento: inspecionar o cache pelo console do navegador.
+if (import.meta.env.DEV) Object.assign(window, { __kurioQueryClient: queryClient })
 
 const root = document.getElementById('root')
 if (!root) throw new Error('Elemento #root não encontrado')

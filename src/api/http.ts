@@ -13,6 +13,8 @@ let transportReady: Promise<unknown> = Promise.resolve()
 export function setTransportReady(ready: Promise<unknown>) {
   transportReady = ready.catch(() => undefined)
 }
+/** Resolve quando a rede (real ou simulada) está pronta. O Socket.IO espera por isso. */
+export const whenTransportReady = () => transportReady
 
 type SessionLostReason = 'expired' | 'invalid'
 const sessionLostListeners = new Set<(reason: SessionLostReason) => void>()
