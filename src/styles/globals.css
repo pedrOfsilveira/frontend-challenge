@@ -70,6 +70,7 @@
   --color-sand: var(--sand);
   --color-sand-light: var(--sand-light);
   --color-cream: var(--cream);
+  --color-cream-light: var(--cream-light);
   --color-paper: var(--paper);
 
   --text-display: 2.6875rem;
@@ -83,6 +84,15 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --container-page: 75rem;
+
+  --color-surface-raised: #2f1d15;
+
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
 }
 
 @layer base {
@@ -95,4 +105,12 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
+}
+
+/* Container do Figma: 1200 px de conteúdo; abaixo disso, margem de 24 px. */
+@utility page-container {
+  margin-inline: auto;
+  width: 100%;
+  max-width: calc(var(--container-page) + 3rem);
+  padding-inline: 1.5rem;
 }
