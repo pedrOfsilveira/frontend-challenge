@@ -62,7 +62,7 @@ function NftDetailPage() {
           <DetailSkeleton />
         )}
         {detail.data && <NftDetailsTabs nft={detail.data} />}
-        {!detail.isError && <RelatedNfts nftId={nftId} />}
+        {detail.data && <RelatedNfts nftId={nftId} />}
       </main>
       <SiteFooter />
     </>
@@ -351,6 +351,11 @@ function DetailSkeleton() {
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-7 w-1/2" />
         </div>
+      </div>
+      <div className="mt-16 flex flex-col gap-6 lg:mt-24" aria-hidden="true">
+        <Skeleton className="h-8 w-2/3" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-32 w-full" />
       </div>
     </div>
   )

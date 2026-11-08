@@ -345,7 +345,7 @@ function CheckoutForm({ userId, cart, wallets, profile }: { userId: string; cart
           <div className="mt-auto flex flex-col gap-6 pt-4 pb-8 lg:hidden">
             <p className="flex items-center justify-end gap-7 font-bold" aria-busy={quoteState.stale}>
               <span className="text-base leading-4 text-cream">Total:</span>
-              <span className={cn('text-lg leading-4 text-copper-light', quoteState.stale && 'opacity-60')}>{quoteQuery.data ? formatEth(quoteQuery.data.totalEth) : '…'}</span>
+              <span aria-busy={quoteState.stale} className="text-lg leading-4 text-copper-light">{quoteQuery.data ? formatEth(quoteQuery.data.totalEth) : '…'}</span>
             </p>
             {cta('h-[60px] w-full rounded-[40px] bg-linear-[108deg] from-copper from-4% to-copper/80 text-[15px] leading-4')}
           </div>
@@ -360,7 +360,7 @@ function CheckoutForm({ userId, cart, wallets, profile }: { userId: string; cart
             <span className="font-bold">NFTs</span>
             <span className="font-medium">Subtotal</span>
           </div>
-          <ul className={cn('flex flex-col gap-3', quoteState.stale && 'opacity-60')}>
+          <ul aria-busy={quoteState.stale} className="flex flex-col gap-3">
             {(quoteQuery.data?.lines ?? []).map((line) => (
               <li key={`${line.nftId}:${line.editionId}`} className="flex h-[70px] items-center gap-2 bg-surface-card pr-4 pl-1">
                 <NftImage src={line.image} alt="" sizes="66px" className="size-[66px] shrink-0 rounded-lg object-cover" />
@@ -383,7 +383,7 @@ function CheckoutForm({ userId, cart, wallets, profile }: { userId: string; cart
           )}
           <p className="text-center text-sm leading-4 text-cream">
             Tem um código promocional?{' '}
-            <Link to="/carrinho" className={cn('text-copper-light underline-offset-4 hover:underline', focusRing)}>
+            <Link to="/carrinho" className={cn('text-copper-light underline underline-offset-4', focusRing)}>
               Aplique aqui
             </Link>
           </p>

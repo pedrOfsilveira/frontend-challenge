@@ -72,7 +72,7 @@ export function ReviewDialog(props: ReviewDialogProps) {
               NFTs
             </h3>
             {quote ? (
-              <ul className={cn('flex flex-col gap-2 transition-opacity', props.refreshing && 'opacity-60')}>
+              <ul aria-busy={props.refreshing} className="flex flex-col gap-2">
                 {quote.lines.map((line) => (
                   <li key={`${line.nftId}:${line.editionId}`} className="flex items-center gap-3 bg-ink/40 pr-3">
                     <NftImage src={line.image} alt="" sizes="48px" className="size-12 shrink-0 rounded-md object-cover" />
@@ -93,7 +93,7 @@ export function ReviewDialog(props: ReviewDialogProps) {
           </section>
 
           {quote && (
-            <dl className={cn('flex flex-col gap-2 border-y border-copper/35 py-3 text-sm transition-opacity', props.refreshing && 'opacity-60')}>
+            <dl aria-busy={props.refreshing} className="flex flex-col gap-2 border-y border-copper/35 py-3 text-sm">
               <Row label="Subtotal" value={formatEth(quote.subtotalEth)} />
               <Row label={quote.coupon?.label ?? 'Desconto'} value={`(-) ${formatEth(quote.discountEth)}`} />
               <Row label={`Taxa de rede (${NETWORK_LABELS[quote.network]})`} value={formatEth(quote.networkFeeEth)} />

@@ -156,7 +156,7 @@ export function QuoteTotals({ state, variant }: { state: QuoteState; variant: Va
     eth === undefined ? <Skeleton className="h-4 w-20" /> : <span className={cn('text-right', className)}>{eth}</span>
 
   return (
-    <div aria-busy={stale || !quote} className={cn('flex flex-col gap-3 transition-opacity', stale && 'opacity-60')}>
+    <div aria-busy={stale || !quote} className="flex flex-col gap-3">
       <dl className="flex flex-col gap-3 text-[15px] whitespace-nowrap text-cream">
         <div className="flex items-start justify-between gap-3">
           <dt>Subtotal</dt>

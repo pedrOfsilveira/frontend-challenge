@@ -61,18 +61,19 @@ export function NftGallery({ images, name }: { images: string[]; name: string })
 export function MobileGallery({ images, name }: { images: string[]; name: string }) {
   const [index, setIndex] = useState(0)
   const track = useRef<HTMLUListElement>(null)
-  const goTo = (i: number) => track.current?.children[i]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+  const goTo = (i: number) => track.current?.children[i]?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest', inline: 'start' })
 
   return (
     <div className="relative mx-auto w-full max-w-[480px]">
       <ul
         ref={track}
         aria-label="Imagens do NFT"
+        tabIndex={0}
         onScroll={(event) => {
           const el = event.currentTarget
           setIndex(Math.round(el.scrollLeft / Math.max(1, el.clientWidth)))
         }}
-        className="flex snap-x snap-mandatory overflow-x-auto rounded-3xl [scrollbar-width:none] motion-reduce:scroll-auto [&::-webkit-scrollbar]:hidden"
+        className={cn('flex snap-x snap-mandatory overflow-x-auto rounded-3xl [scrollbar-width:none] motion-reduce:scroll-auto [&::-webkit-scrollbar]:hidden', focusRing)}
       >
         {images.map((src, i) => (
           <li key={`${src}-${i}`} className="w-full shrink-0 snap-start">
@@ -89,8 +90,8 @@ export function MobileGallery({ images, name }: { images: string[]; name: string
               aria-label={`Imagem ${i + 1}`}
               aria-current={i === index ? 'true' : undefined}
               onClick={() => goTo(i)}
-              className={cn('h-[7px] rounded-full bg-copper transition-[width] motion-reduce:transition-none', i === index ? 'w-7' : 'w-[7px]', focusRing)}
-            />
+              className={cn('grid h-6 min-w-6 place-items-center rounded-full', focusRing)}
+            ><span aria-hidden className={cn('h-[7px] rounded-full bg-copper transition-[width] motion-reduce:transition-none', i === index ? 'w-7' : 'w-[7px]')} /></button>
           ))}
         </div>
       )}

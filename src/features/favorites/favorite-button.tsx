@@ -36,12 +36,13 @@ interface FavoriteButtonProps {
 }
 
 export function FavoriteButton({ nftId, nftName, className, variant = 'card' }: FavoriteButtonProps) {
-  const { favorite, toggle, pending } = useFavoriteToggle(nftId)
+  const { favorite, toggle, pending, error } = useFavoriteToggle(nftId)
   const label = favorite ? `Remover ${nftName} dos favoritos` : `Favoritar ${nftName}`
+  const feedback = error && <p role="alert" className={cn('max-w-64 text-xs text-[#ff8a7a]', variant !== 'labeled' && 'absolute top-12 right-2 z-20 rounded border border-border-soft bg-surface-card p-2')}>{error.message} Tente novamente.</p>
 
   if (variant === 'labeled') {
     return (
-      <button
+      <><button
         type="button"
         aria-pressed={favorite}
         disabled={pending}
@@ -50,13 +51,13 @@ export function FavoriteButton({ nftId, nftName, className, variant = 'card' }: 
       >
         {favorite ? <MaskIcon src={filledHeart} width={20} height={18} className="text-copper" /> : <img src={desktopHeart} alt="" width={20} height={20} />}
         {favorite ? 'Favoritado' : 'Favoritar'}
-      </button>
+      </button>{feedback}</>
     )
   }
 
   const size = variant === 'hero' ? 'size-[35px]' : 'size-7'
   return (
-    <button type="button" aria-pressed={favorite} aria-label={label} disabled={pending} onClick={toggle} className={cn('grid place-items-center rounded-full', size, focusRing, className)}>
+    <><button type="button" aria-pressed={favorite} aria-label={label} disabled={pending} onClick={toggle} className={cn('grid place-items-center rounded-full', size, focusRing, className)}>
       {variant === 'card' && !favorite ? (
         <img src={favButton} alt="" width={28} height={28} />
       ) : (
@@ -64,6 +65,6 @@ export function FavoriteButton({ nftId, nftName, className, variant = 'card' }: 
           {favorite ? <MaskIcon src={filledHeart} width={variant === 'hero' ? 16 : 15} height={variant === 'hero' ? 14 : 13} /> : <img src={heroHeart} alt="" width={16} height={14} />}
         </span>
       )}
-    </button>
+    </button>{feedback}</>
   )
 }

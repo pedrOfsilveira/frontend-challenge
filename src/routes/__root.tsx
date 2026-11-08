@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { onSessionLost } from '@/api/http'
 import { switchSession } from '@/features/session/session'
 import { startRealtime } from '@/realtime/client'
+import { NotFoundPage } from '@/components/layout/not-found-page'
 
 export interface RouterContext {
   queryClient: QueryClient
@@ -11,6 +12,7 @@ export interface RouterContext {
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
+  notFoundComponent: NotFoundPage,
 })
 
 function RootLayout() {
