@@ -36,16 +36,7 @@ export function validate<T extends z.ZodType>(schema: T, input: unknown): z.infe
 }
 
 /** JSON com chaves ordenadas: dois corpos iguais em conteúdo têm a mesma impressão digital. */
-export function canonicalJson(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`
-  if (value && typeof value === 'object') {
-    const entries = Object.entries(value as Record<string, unknown>)
-      .filter(([, v]) => v !== undefined)
-      .sort(([a], [b]) => (a < b ? -1 : 1))
-    return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${canonicalJson(v)}`).join(',')}}`
-  }
-  return JSON.stringify(value)
-}
+export { canonical as canonicalJson } from '@/lib/canonical'
 
 /** FNV-1a de 32 bits em hex: suficiente para ids determinísticos da simulação. */
 export function hash(input: string): string {
