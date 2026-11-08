@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { NETWORK_LABELS } from '@/features/catalog/search'
 import { NftImage } from '@/features/catalog/nft-image'
-import { relatedNftsQuery } from '@/features/catalog/queries'
+import { featuredNftsQuery, relatedNftsQuery } from '@/features/catalog/queries'
 import { formatEth } from '@/lib/format'
 import { RatingStars } from './purchase-controls'
 
@@ -99,14 +99,20 @@ export function NftDetailsTabs({ nft }: { nft: NftDetail }) {
 }
 
 /** "Mais desta coleção": cinco cards (Figma 219 × 255). No mobile, rolagem horizontal. */
-export function RelatedNfts({ nftId }: { nftId: string }) {
-  const { data, isPending, isError } = useQuery(relatedNftsQuery(nftId))
+/**
+ * Carrossel de NFTs relacionados. Com `nftId`, os da mesma coleção; sem, os destaques
+ * (carrinho vazio ainda tem o que sugerir).
+ */
+export function RelatedNfts({ nftId, title = 'Mais desta coleção' }: { nftId?: string; title?: string }) {
+  const related = useQuery({ ...relatedNftsQuery(nftId ?? ''), enabled: nftId !== undefined })
+  const featured = useQuery({ ...featuredNftsQuery(), enabled: nftId === undefined })
+  const { data, isPending, isError } = nftId === undefined ? featured : related
   if (isError || (data && data.items.length === 0)) return null
 
   return (
     <section aria-labelledby="related-title" className="flex flex-col gap-8">
       <h2 id="related-title" className="border-b border-copper/35 pb-3 text-[17px] leading-4 font-bold text-copper-light">
-        Mais desta coleção
+        {title}
       </h2>
       <ul className="-mx-6 flex snap-x gap-4 overflow-x-auto px-6 pb-2 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-5 lg:gap-[26px] lg:overflow-visible lg:px-0 [&::-webkit-scrollbar]:hidden">
         {isPending
