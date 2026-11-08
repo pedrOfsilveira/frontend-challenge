@@ -9,7 +9,7 @@ import { guestCart, sessionStore, type StoredSession } from './session-store'
 export type PrivateScope = `user:${string}` | `guest:${string}`
 
 export function privateScope(session: StoredSession | null = sessionStore.get()): PrivateScope {
-  return session ? `user:${session.userId}` : `guest:${guestCart.peek() ?? 'new'}`
+  return session ? `user:${session.userId}` : `guest:${guestCart.id()}`
 }
 
 /**
@@ -34,5 +34,6 @@ export const queryKeys = {
     orders: (scope: PrivateScope) => ['private', scope, 'orders'] as const,
     order: (scope: PrivateScope, id: string) => ['private', scope, 'orders', 'detail', id] as const,
     pendingOrders: (scope: PrivateScope) => ['private', scope, 'orders', 'pending'] as const,
+    favorites: (scope: PrivateScope) => ['private', scope, 'favorites'] as const,
   },
 }

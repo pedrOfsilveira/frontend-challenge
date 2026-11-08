@@ -59,16 +59,22 @@ if (typeof window !== 'undefined') {
   })
 }
 
+// Em memória também: sem localStorage (modo privado) o id continua estável durante a aba.
+let guestId: string | null = null
+
 export const guestCart = {
-  /** Id do carrinho anônimo; criado sob demanda. */
+  /** Id do carrinho anônimo; criado sob demanda e estável durante a vida da aba. */
   id(): string {
-    const existing = read<string>(GUEST_CART_KEY)
-    if (existing) return existing
-    const created = `guest_${crypto.randomUUID()}`
-    write(GUEST_CART_KEY, created)
-    return created
+    guestId ??= read<string>(GUEST_CART_KEY)
+    if (guestId) return guestId
+    guestId = `guest_${crypto.randomUUID()}`
+    write(GUEST_CART_KEY, guestId)
+    return guestId
   },
-  peek: () => read<string>(GUEST_CART_KEY),
+  peek: () => guestId ?? read<string>(GUEST_CART_KEY),
   /** Depois da mescla no login, o carrinho anônimo deixa de existir. */
-  clear: () => write(GUEST_CART_KEY, null),
+  clear() {
+    guestId = null
+    write(GUEST_CART_KEY, null)
+  },
 }
