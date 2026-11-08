@@ -18,7 +18,7 @@ export const SCENARIOS = {
 } as const
 export type ScenarioId = keyof typeof SCENARIOS
 
-export type FailureKind = 'network' | 'timeout' | 'server-error' | 'after-commit'
+export type FailureKind = 'network' | 'timeout' | 'server-error' | 'after-commit' | 'timeout-after-commit'
 
 const STORAGE_KEY = 'kurio.mock.scenario'
 const SEED = 4242

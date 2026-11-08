@@ -65,13 +65,13 @@ function endpoint(route: string, resolver: Resolver) {
       return HttpResponse.json(new MockError('SERVICE_UNAVAILABLE', 'Serviço temporariamente indisponível. Tente novamente.').toBody(), { status: 503 })
     }
 
-    return serialized(async () => {
+    const response = await serialized(async () => {
       const db = store.get()
       orders.resolveDue(db)
       try {
         const result = await resolver({ db, request, params, url: new URL(request.url) })
         store.persist()
-        // Simula "timeout depois de gravar": o servidor processou, mas a resposta se perde.
+        // Perda de resposta depois de gravar: falha de rede imediata, distinta do timeout abaixo.
         if (plan.failure === 'after-commit') return HttpResponse.error()
         return result.status === 204 ? new HttpResponse(null, { status: 204 }) : HttpResponse.json(result.body as never, { status: result.status ?? 200 })
       } catch (error) {
@@ -83,6 +83,10 @@ function endpoint(route: string, resolver: Resolver) {
         afterRequest.forEach((listener) => listener())
       }
     })
+    // A transação já terminou. Atrasar a resposta fora da fila permite que o retry encontre
+    // o pedido persistido enquanto a primeira requisição expira no Axios (10 s).
+    if (plan.failure === 'timeout-after-commit' && response.ok) await delay(TIMEOUT_DELAY_MS)
+    return response
   }
 }
 
