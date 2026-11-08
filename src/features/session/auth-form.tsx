@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
-import { useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { cn } from 'cn'
 import { loginRequest, registerRequest, type AuthResponse } from '@/api/contracts'
 import { authApi } from '@/api/endpoints'
 import { isApiError } from '@/api/errors'
-import { guestCart } from '@/api/session-store'
+import { guestCart, sessionStore } from '@/api/session-store'
 import closeIcon from '@/assets/figma/close.svg'
 import hideIcon from '@/assets/figma/auth-hide.svg'
 import googleGreen from '@/assets/figma/auth-88a3c.svg'
@@ -34,6 +34,12 @@ export function AuthForm({ register, redirect, expired, onModeChange }: {
   const navigate = useNavigate()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const active = useRef(true)
+  const startingToken = useRef(sessionStore.getToken())
+  useEffect(() => {
+    active.current = true
+    return () => { active.current = false }
+  }, [])
   const [values, setValues] = useState({ username: '', email: '', password: '', confirmPassword: '' })
   const [errors, setErrors] = useState<Errors>({})
   const [visible, setVisible] = useState(false)
@@ -48,6 +54,8 @@ export function AuthForm({ register, redirect, expired, onModeChange }: {
     mutationFn: (body: { email: string; password: string; username: string }) =>
       register ? authApi.register({ ...body, displayName: body.username }) : authApi.login(body),
     onSuccess: async (result) => {
+      // Leaving this form or a newer identity established elsewhere abandons this attempt.
+      if (!active.current || sessionStore.getToken() !== startingToken.current) return
       await switchSession(queryClient, { token: result.token, userId: result.user.id, expiresAt: result.expiresAt })
       guestCart.clear()
       setValues((old) => ({ ...old, password: '', confirmPassword: '' }))
@@ -59,6 +67,7 @@ export function AuthForm({ register, redirect, expired, onModeChange }: {
     },
   })
   const change = (field: Fields, value: string) => {
+    if (mutation.isPending) return
     setValues((old) => ({ ...old, [field]: value }))
     setErrors((old) => ({ ...old, [field]: undefined }))
     mutation.reset()
@@ -96,9 +105,9 @@ export function AuthForm({ register, redirect, expired, onModeChange }: {
   return (
     <Dialog open onOpenChange={(open) => { if (!open && !mutation.isPending) void navigate({ to: '/' }) }}>
       <DialogContent showCloseButton={false} overlayClassName="bg-transparent" className={cn('fixed inset-0 top-0 left-0 flex h-dvh w-full max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-y-auto rounded-none border-0 bg-ink p-0 text-cream shadow-none sm:max-w-none lg:inset-auto lg:top-[160px] lg:left-1/2 lg:h-auto lg:max-h-[calc(100dvh-176px)] lg:w-[500px] lg:-translate-x-1/2 lg:rounded-lg lg:bg-surface-card lg:shadow-xl', register ? 'lg:min-h-[min(656px,calc(100dvh-176px))]' : 'lg:min-h-[min(600px,calc(100dvh-176px))]')}>
-        <Link to="/" aria-label="Fechar e voltar ao mercado" className={cn('absolute top-3 right-3 grid size-8 place-items-center rounded', focusRing)}><img src={closeIcon} alt="" width={18} height={17.35} /></Link>
+        <Link to="/" aria-label="Fechar e voltar ao mercado" aria-disabled={mutation.isPending} onClick={(event) => { if (mutation.isPending) event.preventDefault() }} className={cn('absolute top-3 right-3 grid size-8 place-items-center rounded', focusRing)}><img src={closeIcon} alt="" width={18} height={17.35} /></Link>
         <div className="flex shrink-0 flex-col gap-10 px-7 pt-20 lg:gap-0 lg:px-0 lg:pt-12">
-          <Link to="/" className={cn('flex h-[136px] items-center justify-center text-[32px] font-bold tracking-[3.2px] lg:hidden', focusRing)}>KURIO</Link>
+          <Link to="/" aria-disabled={mutation.isPending} onClick={(event) => { if (mutation.isPending) event.preventDefault() }} className={cn('flex h-[136px] items-center justify-center text-[32px] font-bold tracking-[3.2px] lg:hidden', focusRing)}>KURIO</Link>
           <div className="hidden justify-center gap-2 text-xl leading-4 font-medium lg:flex">
             <button type="button" aria-pressed={!register} disabled={mutation.isPending} onClick={() => onModeChange(false)} className={cn(focusRing, !register && 'text-copper-light')}>Entrar</button>
             <span aria-hidden className="text-[#f0805f]">|</span>
@@ -109,15 +118,15 @@ export function AuthForm({ register, redirect, expired, onModeChange }: {
           <form ref={form} onSubmit={submit} noValidate aria-label={register ? 'Cadastro' : 'Login'} className="flex flex-col lg:mt-6 lg:px-20">
             {expired && <p role="status" className="mb-3 text-sm text-copper-light">Sua sessão expirou. Entre novamente para retomar de onde parou.</p>}
             {authenticated ? <div role="status" className="flex flex-col gap-4 text-sm"><p>Conta conectada. Ajustamos itens do carrinho à disponibilidade atual:</p><ul>{authenticated.cartMerge.map((item) => <li key={`${item.nftId}:${item.editionId}`}>{item.name}: {item.kept} de {item.requested} unidades preservadas.</li>)}</ul><button type="button" onClick={() => void finish()} className={cn('rounded bg-copper p-3 font-bold text-ink', focusRing)}>Continuar</button></div> : <>
-              <div className="flex flex-col gap-3">
+              <fieldset disabled={mutation.isPending} className="flex flex-col gap-3">
                 {register && field('username', 'Nome de usuário', 'Nome de usuário')}
                 {field('email', 'E-mail', register ? 'Digite seu e-mail' : 'contato@email.com')}
                 {field('password', 'Senha', 'Senha', true)}
                 {register && field('confirmPassword', 'Confirmar senha', 'Confirmar senha', true)}
                 {!register && <button type="button" onClick={() => setNotice('Recuperação de senha indisponível nesta demonstração. Use as credenciais fictícias documentadas.')} className={cn('self-end text-sm leading-4 text-copper-light', focusRing)}>Esqueceu a senha?</button>}
-              </div>
+              </fieldset>
               {mutation.error && <p role="alert" className="mt-3 text-sm text-[#ff8a7a]">{mutation.error.message}</p>}
-              <button type="submit" disabled={mutation.isPending} className={cn('mt-10 h-[60px] rounded-[10px] bg-copper text-base font-bold text-ink hover:bg-copper-light disabled:opacity-60 lg:mt-6 lg:h-[45px] lg:rounded-[5px]', focusRing)}>{mutation.isPending ? 'Aguarde…' : register ? 'Criar conta' : 'Entrar'}</button>
+              <button type="submit" disabled={mutation.isPending} className={cn('mt-10 h-[60px] rounded-[10px] bg-copper text-base font-bold text-ink hover:bg-copper-light disabled:opacity-60 lg:mt-6 lg:h-[45px] lg:rounded-[5px]', focusRing)}>{mutation.isPending ? 'Aguarde…' : register ? <><span className="lg:hidden">Criar perfil</span><span className="hidden lg:inline">Criar conta</span></> : 'Entrar'}</button>
             </>}
           </form>
         </div>
@@ -129,7 +138,7 @@ export function AuthForm({ register, redirect, expired, onModeChange }: {
             </div>
           </div>
           <p id={`${id}-social`} className="sr-only">Login social não faz parte da demonstração.</p>
-          <button type="button" onClick={() => onModeChange(!register)} className={cn('mx-7 mt-10 mb-6 text-center text-[15px] text-sand-light lg:hidden', focusRing)}>{register ? 'Já tem uma conta? Entre' : 'Novo na Kurio? Crie uma conta'}</button>
+          <button type="button" disabled={mutation.isPending} onClick={() => onModeChange(!register)} className={cn('mx-7 mt-10 mb-6 text-center text-[15px] text-sand-light lg:hidden', focusRing)}>{register ? 'Já tem uma conta? Entre' : 'Novo na Kurio? Crie uma conta'}</button>
         </>}
         {notice && <p role="status" className="mx-7 mt-4 mb-6 text-sm text-sand-light lg:mx-12">{notice}</p>}
         <div aria-hidden className="mt-auto hidden min-h-2.5 shrink-0 bg-copper lg:block" />
