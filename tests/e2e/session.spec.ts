@@ -55,6 +55,11 @@ test('sessão expirada durante checkout retorna ao pagamento com o carrinho salv
   await ready(page)
   await expect(page).toHaveURL(/\/entrar\?.*motivo=expirada/)
   await expect(page.getByText('Sua sessão expirou. Entre novamente para retomar de onde parou.')).toBeVisible()
+  // A 401 may clear the token just before a refresh interrupts its redirect.
+  // Entering the protected URL again must retain the reason for this same tab.
+  await page.goto('/pagamento')
+  await expect(page).toHaveURL(/\/entrar\?.*motivo=expirada/)
+  await expect(page.getByText('Sua sessão expirou. Entre novamente para retomar de onde parou.')).toBeVisible()
   await signIn(page)
   await expect(page).toHaveURL(/\/pagamento$/)
   await page.getByRole('button', { name: 'Confirmar compra', exact: true }).click()

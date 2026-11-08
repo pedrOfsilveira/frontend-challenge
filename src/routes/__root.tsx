@@ -2,6 +2,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext, Outlet, useRouter } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { onSessionLost } from '@/api/http'
+import { sessionLoss } from '@/api/session-store'
 import { switchSession } from '@/features/session/session'
 import { startRealtime } from '@/realtime/client'
 import { NotFoundPage } from '@/components/layout/not-found-page'
@@ -25,6 +26,7 @@ function RootLayout() {
   const router = useRouter()
   useEffect(() => {
     const unsubscribe = onSessionLost((reason) => {
+      sessionLoss.remember(reason === 'expired')
       void switchSession(queryClient, null)
       const { pathname, href } = router.state.location
       if (pathname === '/entrar') return

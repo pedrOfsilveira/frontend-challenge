@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import { authApi } from '@/api/endpoints'
-import { guestCart } from '@/api/session-store'
+import { guestCart, sessionLoss } from '@/api/session-store'
 import { switchSession } from './session'
 
 export function useLogout() {
@@ -11,6 +11,7 @@ export function useLogout() {
   return useMutation({
     mutationFn: authApi.logout,
     onSuccess: async () => {
+      sessionLoss.remember(false)
       guestCart.clear()
       await switchSession(queryClient, null)
       await router.invalidate()

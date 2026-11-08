@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
-import { sessionStore } from '@/api/session-store'
+import { sessionLoss, sessionStore } from '@/api/session-store'
 
 /**
  * Rotas que exigem conta (pagamento, pedido, perfil, carteiras). Sem sessão, vai para o login
@@ -9,7 +9,7 @@ import { sessionStore } from '@/api/session-store'
 export const Route = createFileRoute('/_privado')({
   beforeLoad: ({ location }) => {
     if (!sessionStore.get()) {
-      throw redirect({ to: '/entrar', search: { redirect: location.href } })
+      throw redirect({ to: '/entrar', search: { redirect: location.href, motivo: sessionLoss.expired() ? 'expirada' : undefined } })
     }
   },
   component: Outlet,

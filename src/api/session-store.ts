@@ -5,6 +5,21 @@
  */
 const SESSION_KEY = 'kurio.session'
 const GUEST_CART_KEY = 'kurio.guest-cart'
+const SESSION_LOSS_KEY = 'kurio.session-loss'
+
+// A refresh can interrupt the redirect after a 401 has already cleared the token.
+// Keep only the reason in this tab until login/logout; never retain account data.
+export const sessionLoss = {
+  remember(expired: boolean) {
+    try {
+      if (expired) sessionStorage.setItem(SESSION_LOSS_KEY, 'expired')
+      else sessionStorage.removeItem(SESSION_LOSS_KEY)
+    } catch { /* storage unavailable */ }
+  },
+  expired() {
+    try { return sessionStorage.getItem(SESSION_LOSS_KEY) === 'expired' } catch { return false }
+  },
+}
 
 export interface StoredSession {
   token: string
@@ -40,6 +55,7 @@ export const sessionStore = {
   getToken: () => current?.token ?? null,
   set(next: StoredSession | null) {
     if (next?.token === current?.token) return
+    if (next) sessionLoss.remember(false)
     current = next
     write(SESSION_KEY, next)
     listeners.forEach((listener) => listener())
