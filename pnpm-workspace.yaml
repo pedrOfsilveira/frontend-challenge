@@ -1,0 +1,3 @@
+# The worker is versioned in public/; installation must not regenerate it.
+allowBuilds:
+  msw: false
