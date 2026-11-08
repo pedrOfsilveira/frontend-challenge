@@ -175,8 +175,8 @@ de tela. Lighthouse usa o mesmo build completo da demo.
   alegações não são evidência desta entrega. A retomada não copiou código
   adicional de forks: usa contratos locais e Figma.
 - Performance mobile ficou abaixo de 90; veja os resultados e causas abaixo.
-- A URL temporária da Vercel redireciona para autenticação. A validação pública
-  está pendente de assumir o projeto e liberar o acesso; não foi aprovada.
+- O endereço técnico `.vercel.app` exige autenticação da plataforma. O domínio
+  público `racing-sable-eislhs3.tmp.now` serve a aplicação sem esse bloqueio.
 
 ## Evidências finais (08/11/2026)
 
@@ -224,3 +224,19 @@ postinstall. Isso evita `ERR_PNPM_IGNORED_BUILDS` no pnpm 12, sem liberar script
 
 [README](README.md) descreve credenciais/cenários; [testes](tests/README.md)
 descreve isolamento e auditorias. [Enunciado original](docs/challenge.md) permanece separado.
+
+Publicação assumida pelo candidato: https://racing-sable-eislhs3.tmp.now.
+Acesso HTTP direto às rotas SPA e ao service worker confirmado após a
+transferência; o worker mantém MIME JavaScript e headers sem cache.
+
+Validação externa após transferência: **35 de 36 E2E passaram**. O restante
+reproduziu perda intermitente do aviso de sessão expirada quando um refresh
+interrompe o redirecionamento após o token já ter sido apagado. A correção local
+preserva apenas o motivo em sessionStorage da aba até login/logout; não guarda
+dados da conta. O domínio publicado ainda está na versão anterior a essa correção.
+O deploy da correção exige autenticar a CLI na conta que assumiu o projeto.
+
+Após a correção, typecheck/lint/build e os **54 E2E locais passaram novamente**
+(sem atualizar baselines). A regressão inclui reabrir diretamente o checkout com
+o token já removido. Os relatórios Lighthouse acima antecedem essa correção de
+sessão; ela não foi medida em nova auditoria de performance.

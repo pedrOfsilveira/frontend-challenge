@@ -133,12 +133,16 @@ Repositório: https://github.com/pedrOfsilveira/frontend-challenge
 worker. O deploy inclui `.env.production` com mocks ativos. Acesso direto e
 refresh de detalhe, pagamento, perfil, carteiras e pedido devem funcionar na URL pública.
 
-Deploy temporário criado:
-https://temporary-spry-sequoia-4n10lpd-anon-phi-vert.vercel.app
+Site publicado: **https://racing-sable-eislhs3.tmp.now**
 
-**Publicação ainda pendente:** a Vercel está exigindo autenticação nessa URL.
-Os testes externos foram interrompidos na página de login da plataforma; não
-comprovam os fluxos da aplicação. O proprietário precisa assumir o projeto pelo
-link de claim recebido na sessão e liberar o acesso público, ou autenticar a CLI
-com `vercel login` para publicar em sua conta. Sem claim, o projeto temporário
-expira uma hora após sua criação. O código e os 54 E2E locais estão validados.
+O projeto foi assumido na conta Vercel do candidato. Esse endereço serve a
+aplicação sem autenticação da plataforma. Acesso HTTP direto às rotas de detalhe,
+perfil, carteiras, pagamento e pedido foi confirmado; o worker é entregue como
+JavaScript com `no-cache, no-store, must-revalidate`.
+
+O endereço técnico `temporary-racing-sable-eislhs3-anon-omega-green.vercel.app`
+ainda exige login da Vercel; use o endereço público acima para avaliação.
+
+Validação no site publicado: 35/36 E2E passaram. Há uma correção local para perda
+intermitente do aviso de expiração durante refresh; ela ainda precisa ser
+publicada com a CLI autenticada na conta proprietária. Veja ARCHITECTURE.md.
