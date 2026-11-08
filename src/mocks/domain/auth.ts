@@ -18,7 +18,9 @@ export function authenticate(db: Db, authorization: string | null): { user: DbUs
   const session = db.sessions.find((s) => s.token === token)
   if (!session) throw new MockError('UNAUTHENTICATED', 'Sessão inválida. Entre novamente.')
   if (Date.parse(session.expiresAt) <= Date.now()) {
-    db.sessions = db.sessions.filter((s) => s !== session)
+    // Preserve the expired record: a canceled 401 must not make the next request
+    // classify the same token as unknown. Expired tokens are never authorized.
+    // Explicit logout or mock reset removes the record.
     throw new MockError('SESSION_EXPIRED', 'Sua sessão expirou. Entre novamente para continuar.')
   }
   const user = db.users.find((u) => u.id === session.userId)
