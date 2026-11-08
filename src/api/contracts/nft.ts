@@ -36,7 +36,7 @@ export const nftSummary = z.object({
   image: z.string(),
   category,
   network,
-  /** Menor preço entre as edições disponíveis (ou da edição padrão se todas esgotaram). */
+  /** Preço da edição padrão; se ela esgotou, o menor entre as edições disponíveis. */
   priceEth: ethAmount,
   /** Preço "de", riscado no card. */
   compareAtPriceEth: ethAmount.nullable(),
