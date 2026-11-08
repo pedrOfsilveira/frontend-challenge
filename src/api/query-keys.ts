@@ -35,5 +35,7 @@ export const queryKeys = {
     order: (scope: PrivateScope, id: string) => ['private', scope, 'orders', 'detail', id] as const,
     pendingOrders: (scope: PrivateScope) => ['private', scope, 'orders', 'pending'] as const,
     favorites: (scope: PrivateScope) => ['private', scope, 'favorites'] as const,
+    profile: (scope: PrivateScope) => ['private', scope, 'profile'] as const,
+    wallets: (scope: PrivateScope) => ['private', scope, 'wallets'] as const,
   },
 }
