@@ -175,8 +175,8 @@ de tela. Lighthouse usa o mesmo build completo da demo.
   alegações não são evidência desta entrega. A retomada não copiou código
   adicional de forks: usa contratos locais e Figma.
 - Performance mobile ficou abaixo de 90; veja os resultados e causas abaixo.
-- O endereço técnico `.vercel.app` exige autenticação da plataforma. O domínio
-  público `racing-sable-eislhs3.tmp.now` serve a aplicação sem esse bloqueio.
+- Previews técnicos exigem autenticação da plataforma. O domínio de produção
+  `racing-sable-eislhs3.vercel.app` serve a aplicação sem esse bloqueio.
 
 ## Evidências finais (08/11/2026)
 
@@ -204,8 +204,9 @@ por essa razão. LCP mobile: 5,64 s no início e 4,85 s no detalhe; TBT: 952/909
 O relatório aponta execução de JavaScript na inicialização: aproximadamente
 2,1 s em uma execução do início, incluindo aplicação e MSW; o chunk do MSW tem
 cerca de 176 KB transferidos, e o Lighthouse estima 129 KB de JS não usado nessa
-navegação. Esses valores descrevem a demo, não um backend real. A inicialização
-do worker e dos handlers precede a renderização para evitar requests não tratados.
+navegação. Esses valores descrevem a demo, não um backend real. A interface
+pode renderizar antes dos mocks; requisições Axios e conexão Socket.IO aguardam
+a inicialização do worker/handlers para evitar tráfego sem tratamento.
 O build mantém fontes, imagens, mocks e Socket.IO ativos na auditoria.
 
 A correção de reserva de espaço no detalhe reduziu CLS de 0,224 para **0,000**;
@@ -225,18 +226,38 @@ postinstall. Isso evita `ERR_PNPM_IGNORED_BUILDS` no pnpm 12, sem liberar script
 [README](README.md) descreve credenciais/cenários; [testes](tests/README.md)
 descreve isolamento e auditorias. [Enunciado original](docs/challenge.md) permanece separado.
 
-Publicação assumida pelo candidato: https://racing-sable-eislhs3.tmp.now.
-Acesso HTTP direto às rotas SPA e ao service worker confirmado após a
-transferência; o worker mantém MIME JavaScript e headers sem cache.
+Projeto assumido pelo candidato e CLI autenticada na conta proprietária.
+A correção do aviso de expiração foi publicada no mesmo projeto. O domínio
+público atual é **https://racing-sable-eislhs3.vercel.app**, adicionado ao projeto
+para acompanhar publicações de produção. O domínio antigo `.tmp.now` não permite
+atualização pela conta transferida e permanece na versão anterior; não é o
+endereço de avaliação. Nenhuma proteção de previews foi desativada.
 
-Validação externa após transferência: **35 de 36 E2E passaram**. O restante
-reproduziu perda intermitente do aviso de sessão expirada quando um refresh
-interrompe o redirecionamento após o token já ter sido apagado. A correção local
-preserva apenas o motivo em sessionStorage da aba até login/logout; não guarda
-dados da conta. O domínio publicado ainda está na versão anterior a essa correção.
-O deploy da correção exige autenticar a CLI na conta que assumiu o projeto.
+A validação externa da versão anterior passou 35 de 36 E2E e revelou perda
+intermitente do aviso de sessão expirada quando um refresh interrompe o
+redirecionamento após o token já ter sido apagado. A correção preserva apenas o
+motivo em sessionStorage da aba até login/logout; não guarda dados da conta.
+Typecheck/lint/build e os **54 E2E locais passaram novamente** sem atualizar
+baselines. A regressão reabre diretamente o checkout com o token já removido.
+Os relatórios Lighthouse acima antecedem essa correção de sessão; ela não foi
+medida em nova auditoria de performance.
 
-Após a correção, typecheck/lint/build e os **54 E2E locais passaram novamente**
-(sem atualizar baselines). A regressão inclui reabrir diretamente o checkout com
-o token já removido. Os relatórios Lighthouse acima antecedem essa correção de
-sessão; ela não foi medida em nova auditoria de performance.
+Preview da correção: `dpl_HsRhw96fyxpJiud6Hpnztfvx7cNG`; promoção para produção:
+`dpl_FAoYKcy3KzpYump6vfez7sir89Tz`. Build remoto concluído com pnpm 12.18 e Node26.
+Rotas SPA e worker JavaScript/no-cache confirmados no domínio de produção.
+
+A primeira publicação da correção ainda apresentou 35/36 E2E: o mock removia a
+sessão vencida na primeira autenticação. Se essa resposta fosse cancelada pelo
+refresh, o próximo request recebia UNAUTHENTICATED em vez de SESSION_EXPIRED.
+Agora o mock mantém o registro vencido até logout/reset; o token continua sempre
+rejeitado. Um teste unitário reproduziu a resposta perdida antes da correção e
+passou depois dela. Logout continua distinguido de expiração. Suite unitária
+atual: **35 testes aprovados**; regressão de expiração repetida três vezes por
+viewport: **6 E2E aprovados**, além de typecheck/lint/build aprovados.
+
+Resultado da publicação final `dpl_DibzKLXiS6CDCc82fNe9519QizZc`, com correção
+`96d9d39`: **36 E2E externos aprovados** em desktop/mobile (2,5 min), sem retries,
+no domínio https://racing-sable-eislhs3.vercel.app. Compra, sessão, perfil,
+carteiras, isolamento, idempotência e tempo real passaram, incluindo o aviso de
+expiração após refresh e nova entrada direta no checkout. Código publicado pela
+CLI autenticada; commits locais ainda não enviados ao GitHub.

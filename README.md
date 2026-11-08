@@ -119,7 +119,8 @@ regressão visual em desktop/mobile. HTML e traces de falha ficam em
 
 Lighthouse gera HTML/JSON de início e detalhe, três execuções por perfil e página,
 com medianas em `reports/lighthouse/summary.md`. Não há versão simplificada para
-auditoria. Resultados finais: 33 unitários e 54 E2E passaram; typecheck, lint e build
+auditoria. Resultados locais: 35 unitários passaram; a suíte completa de 54 E2E passou e a
+regressão de expiração teve outras seis execuções aprovadas; typecheck, lint e build
 passaram também em cópia limpa. Lighthouse: desempenho desktop 97–98,
 mobile 55–62; acessibilidade 100, boas práticas 96, SEO 92. **Performance mobile
 abaixo da meta de 90**, com causas e próximos passos em ARCHITECTURE.md.
@@ -133,16 +134,27 @@ Repositório: https://github.com/pedrOfsilveira/frontend-challenge
 worker. O deploy inclui `.env.production` com mocks ativos. Acesso direto e
 refresh de detalhe, pagamento, perfil, carteiras e pedido devem funcionar na URL pública.
 
-Site publicado: **https://racing-sable-eislhs3.tmp.now**
+Site publicado: **https://racing-sable-eislhs3.vercel.app**
 
-O projeto foi assumido na conta Vercel do candidato. Esse endereço serve a
-aplicação sem autenticação da plataforma. Acesso HTTP direto às rotas de detalhe,
-perfil, carteiras, pagamento e pedido foi confirmado; o worker é entregue como
-JavaScript com `no-cache, no-store, must-revalidate`.
+O projeto `racing-sable-eislhs3` pertence à conta Vercel do candidato. Esse
+domínio está adicionado ao projeto e acompanha as publicações de produção.
+Acesso direto às rotas SPA e entrega do service worker com MIME JavaScript e
+`no-cache, no-store, must-revalidate` foram confirmados.
 
-O endereço técnico `temporary-racing-sable-eislhs3-anon-omega-green.vercel.app`
-ainda exige login da Vercel; use o endereço público acima para avaliação.
+O antigo endereço `.tmp.now` permanece na versão anterior e não deve ser usado
+para avaliação: a conta transferida não permite atualizar esse domínio.
+O endereço público acima já inclui a correção que preserva o aviso de expiração
+quando um refresh interrompe o redirecionamento para login.
 
-Validação no site publicado: 35/36 E2E passaram. Há uma correção local para perda
-intermitente do aviso de expiração durante refresh; ela ainda precisa ser
-publicada com a CLI autenticada na conta proprietária. Veja ARCHITECTURE.md.
+Publicação foi feita pela CLI autenticada, sem push para o GitHub. Para publicar
+outra alteração no mesmo projeto:
+
+```sh
+vercel deploy --project racing-sable-eislhs3 --scope pedrofsilveiras-projects
+# Após validar o preview:
+vercel promote <deployment-url> --scope pedrofsilveiras-projects
+```
+
+Validação final do domínio público: **36 E2E aprovados** em desktop/mobile,
+incluindo compra, conta, expiração após refresh, isolamento e reconexão. Deploy:
+`dpl_DibzKLXiS6CDCc82fNe9519QizZc` (correção `96d9d39`).
