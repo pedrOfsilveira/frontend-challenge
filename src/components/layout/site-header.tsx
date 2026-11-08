@@ -5,6 +5,7 @@ import cartIcon from '@/assets/figma/cart.svg'
 import logoutIcon from '@/assets/figma/logout.svg'
 import searchIcon from '@/assets/figma/search.svg'
 import { useCartCount } from '@/features/cart/use-cart-count'
+import { useSession } from '@/features/session/use-session'
 
 export type HeaderSection = 'home' | 'market'
 
@@ -83,6 +84,7 @@ function HeaderSearch() {
 /** Cabeçalho desktop (Figma "Header Row" + divisória). No mobile a navegação fica na tab bar. */
 export function SiteHeader({ section, divider = true }: { section: HeaderSection; divider?: boolean }) {
   const count = useCartCount()
+  const session = useSession()
 
   return (
     <header className="page-container hidden lg:block">
@@ -122,10 +124,10 @@ export function SiteHeader({ section, divider = true }: { section: HeaderSection
           </Link>
           <Link
             to="/entrar"
-            className="flex h-[35px] w-[100px] items-center justify-center gap-1 rounded-md bg-copper text-base font-medium text-ink hover:bg-copper-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-light"
+            className="flex h-[35px] min-w-[100px] items-center justify-center gap-1 rounded-md bg-copper px-2 text-base font-medium text-ink hover:bg-copper-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-light"
           >
             <img src={logoutIcon} alt="" width={20} height={20} />
-            Entrar
+            {session ? 'Minha conta' : 'Entrar'}
           </Link>
         </div>
       </div>
