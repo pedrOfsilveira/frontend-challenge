@@ -3,6 +3,7 @@ import { controls } from './controls'
 import { store } from './db/store'
 import { handlers, onAfterRequest, serialized } from './handlers'
 import { network } from './network'
+import { realtimeHandler } from './realtime'
 import { nextResolution, resolveDue } from './domain/orders'
 
 const API_PATH = new URL(import.meta.env.VITE_API_URL ?? '/api', location.origin).pathname
@@ -45,7 +46,7 @@ async function applyUrlOptions() {
 export async function startMocks() {
   await store.init()
   await applyUrlOptions()
-  const worker = setupWorker(...handlers)
+  const worker = setupWorker(...handlers, realtimeHandler)
   await worker.start({
     quiet: import.meta.env.PROD,
     serviceWorker: { url: `${import.meta.env.BASE_URL}mockServiceWorker.js` },

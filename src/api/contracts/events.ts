@@ -2,6 +2,12 @@ import { z } from 'zod'
 import { ethAmount, isoDate } from './common'
 import { orderStatus } from './order'
 
+/**
+ * Caminho do Socket.IO. Fora do padrão `/socket.io/` para ficar inequívoco no Network do
+ * DevTools e não depender da exceção que o MSW abre para esse prefixo.
+ */
+export const REALTIME_PATH = '/realtime'
+
 export const REALTIME_EVENTS = {
   nftUpdated: 'nft.updated',
   orderUpdated: 'order.updated',

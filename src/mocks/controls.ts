@@ -4,6 +4,7 @@ import { store } from './db/store'
 import { mockEvents } from './events'
 import { serialized } from './handlers'
 import { network, type FailureKind, type ScenarioId } from './network'
+import { realtimeControls } from './realtime'
 import { changeEdition, findNft } from './domain/catalog'
 import { settleOrder } from './domain/orders'
 
@@ -34,6 +35,7 @@ export const controls = {
       network.reset()
       network.setScenario(options.scenario ?? 'default')
       mockEvents.clear()
+      realtimeControls.reset()
     }),
   setScenario(id: ScenarioId) {
     if (!network.isScenario(id)) throw new Error(`Cenário desconhecido: ${String(id)}`)
@@ -67,6 +69,8 @@ export const controls = {
       return changeEdition(db, nftId, patch.editionId ?? nft.defaultEditionId, patch)
     }),
 
+  /** Socket.IO simulado: conexões, queda, indisponibilidade e reenvio de eventos. */
+  realtime: realtimeControls,
   events: () => mockEvents.history(),
   snapshot: () => structuredClone(store.get()),
 }
