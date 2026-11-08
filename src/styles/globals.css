@@ -1,0 +1,98 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/roboto-mono';
+
+/* Paleta do Figma (tema único, escuro). Os nomes do shadcn apontam para ela. */
+:root {
+  --ink: #140d0a;
+  --surface-card: #241612;
+  --surface-dark: #38220f;
+  --border-strong: #3f2319;
+  --border-soft: #55321f;
+  --copper: #d28a4c;
+  --copper-light: #e89b55;
+  --sand: #b39463;
+  --sand-light: #cfb28c;
+  --cream: #f5f1eb;
+  --cream-light: #f7f3ec;
+  --paper: #fbfbfb;
+
+  --background: var(--ink);
+  --foreground: var(--cream);
+  --card: var(--surface-card);
+  --card-foreground: var(--cream);
+  --popover: var(--surface-card);
+  --popover-foreground: var(--cream);
+  --primary: var(--copper);
+  --primary-foreground: var(--ink);
+  --secondary: var(--surface-dark);
+  --secondary-foreground: var(--cream);
+  --muted: var(--surface-dark);
+  --muted-foreground: var(--sand-light);
+  --accent: var(--surface-dark);
+  --accent-foreground: var(--copper-light);
+  --destructive: #e5484d;
+  --border: var(--border-strong);
+  --input: var(--border-soft);
+  --ring: var(--copper-light);
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --font-sans: 'Roboto Mono Variable', ui-monospace, monospace;
+  --font-mono: 'Roboto Mono Variable', ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-ink: var(--ink);
+  --color-surface-card: var(--surface-card);
+  --color-surface-dark: var(--surface-dark);
+  --color-border-soft: var(--border-soft);
+  --color-copper: var(--copper);
+  --color-copper-light: var(--copper-light);
+  --color-sand: var(--sand);
+  --color-sand-light: var(--sand-light);
+  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+
+  --text-display: 2.6875rem;
+  --text-display--line-height: 4.375rem;
+  --text-heading: 1.5rem;
+  --text-tiny: 0.625rem;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --container-page: 75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
