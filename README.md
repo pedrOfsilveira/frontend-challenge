@@ -153,15 +153,22 @@ Detalhes, execução isolada em paralelo e checkout limpo: [tests/README.md](tes
 ## Estado da verificação
 
 Gate final no commit `347e855`: typecheck, lint e build aprovados; Vitest 47/47; Playwright completo (chromium-desktop + chromium-mobile, sem atualizar baselines): 141 aprovados, 5 ignorados por projeto, 0 falhas em 6,5 min no commit `347e855`; 8 aprovados como falha esperada (`test.fail`) documentam pendências de acessibilidade W2B-R1/R3/R4/R5/R6.
-Os números finais de testes e auditoria só serão registrados depois que o
-código for congelado. A matriz em [docs/evidencias.md](docs/evidencias.md)
+A matriz em [docs/evidencias.md](docs/evidencias.md)
 indica o que cada requisito tem como evidência e o que ainda falta.
 
-Os relatórios em `reports/lighthouse/` são **anteriores** às mudanças desta
-integração e não medem a versão final. Neles, a performance mobile ficou abaixo
-da meta de 90 (início 55, detalhe 62); desktop 97–98; acessibilidade 100, boas
-práticas 96, SEO 92. A auditoria do build final está pendente de validação final.
 Medianas de 3 execuções (09/11/2026, commit `347e855`, preview local, Lighthouse via `pnpm audit:lighthouse`): início mobile P55/A100/BP96/SEO92, LCP 5.570 ms, CLS 0, TBT 919 ms; início desktop P97/A100/BP96/SEO92, LCP 1.129 ms, TBT 71 ms; detalhe mobile P61/A100/BP96/SEO92, LCP 4.942 ms, CLS 0, TBT 878 ms; detalhe desktop P98/A100/BP96/SEO92, LCP 1.100 ms, TBT 74 ms. Meta de performance mobile (≥90) **não atingida**. Causas medidas: primeiro render do React (~2,1 s de scripting a 4× CPU, com layouts forçados em `use-sliding-indicator` e `MobilePurchaseBar`), chunk HTTP (~600 ms, construção de schemas zod), chunk do mock (~176 KB gzip no caminho crítico do LCP do detalhe, ~77 KB de tough-cookie/tldts) e um GET extra por query em voo no primeiro CONNECT.
+
+## Decisões, trade-offs e limitações
+
+Resumo; detalhes em [ARCHITECTURE.md](ARCHITECTURE.md).
+
+- Mocks MSW também no build publicado: REST e Socket.IO (cliente real + `@mswjs/socket.io-binding`) sem backend; o servidor simulado roda por aba e persiste no `localStorage`.
+- ETH como string decimal, cálculos em wei (`bigint`); a cotação do servidor é a referência do total.
+- Sessão simulada com token no `localStorage` (sobrevive ao refresh); senhas só como hash PBKDF2. Não é autenticação de produção.
+- Idempotência por chave derivada do corpo do pedido; revisão bloqueia o pagamento quando a cotação muda.
+- Tempo real: ledger de ids e versões descarta duplicatas/antigos; a cada CONNECT as queries ativas voltam ao REST.
+- Limitações: eventos não cruzam abas; binding sem long-polling/rooms; nenhum handler emite 403 (recurso de outra conta responde 404); performance mobile abaixo de 90 (causas acima).
+- Desvios do Figma: item "Favoritos" no cabeçalho desktop, alvos de toque de 44 px mantendo o desenho, displayName no cadastro, avisos para ações fora de escopo.
 
 ## Publicação
 
@@ -172,8 +179,7 @@ publicado usa `.env.production`, com mocks ativos.
 - Repositório: https://github.com/pedrOfsilveira/frontend-challenge. Branch `main` (mesma revisão em `chore/integracao-wave2-09-11-2026`); código validado no commit `347e855`.
 - Aplicação: https://racing-sable-eislhs3.vercel.app (produção Vercel, build do código validado).
 
-A correspondência entre o código do repositório e a versão publicada ainda não
-foi verificada para esta revisão. (o deploy é feito a partir da revisão enviada ao `main`; commits posteriores, se houver, alteram apenas documentação).
+O commit `59e8ed3` (posterior ao gate em `347e855` e ao deployment `dpl_4rj3VyLq…`, construído de `93367bc`) ajusta o badge do carrinho no cabeçalho e a linha da tabela do carrinho (células com fundo e cantos arredondados, imagem de 64 px); as baselines `carrinho` e `pagamento` desktop foram atualizadas só por essas duas mudanças. Essa mudança de interface não está no gate de `347e855` nem no deploy acima até nova publicação e validação.
 
 Para publicar no projeto Vercel existente (CLI autenticada na conta proprietária):
 

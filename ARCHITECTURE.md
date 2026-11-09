@@ -264,8 +264,7 @@ com 3 execuções sequenciais cada e mediana. Usa o build completo da demo
 (MSW, fontes, imagens e Socket.IO ativos) e termina com exit 1 se alguma meta
 não for atingida.
 
-Os relatórios versionados em `reports/lighthouse/` são **anteriores** a esta
-integração e não medem a versão final:
+Medição anterior a esta integração (referência histórica):
 
 | Página | Perfil | P | A | BP | SEO | LCP | TBT | CLS |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
@@ -274,7 +273,7 @@ integração e não medem a versão final:
 | Detalhe | Mobile | 62 | 100 | 96 | 92 | 4,85 s | 909 ms | 0 |
 | Detalhe | Desktop | 98 | 100 | 96 | 92 | 1,02 s | 80 ms | 0 |
 
-Nesses relatórios, **a meta de performance mobile (≥ 90) não foi atingida.** O
+Nessa medição anterior, **a meta de performance mobile (≥ 90) não foi atingida.** O
 custo apontado é a execução de JavaScript na inicialização, incluindo o
 bootstrap do MSW (chunk de ~176 KB transferidos). Essa é uma pista de
 investigação, não a causa única comprovada. Também desde então, a reconciliação
@@ -321,5 +320,6 @@ bloqueando o WebSocket simulado. `pnpm-workspace.yaml` nega o build do `msw`
 porque o worker já está versionado, o que evita `ERR_PNPM_IGNORED_BUILDS`
 sem liberar scripts.
 
-Revisão publicada, URL e paridade com o repositório: pendente de validação final.
 Publicação: https://racing-sable-eislhs3.vercel.app, produção Vercel construída a partir do código validado em `347e855` e enviado ao `main` de https://github.com/pedrOfsilveira/frontend-challenge.
+
+O commit `59e8ed3` (posterior ao gate em `347e855` e ao deployment `dpl_4rj3VyLq…`, construído de `93367bc`) ajusta o badge do carrinho no cabeçalho e a linha da tabela do carrinho (células com fundo e cantos arredondados, imagem de 64 px); as baselines `carrinho` e `pagamento` desktop foram atualizadas só por essas duas mudanças. Essa mudança de interface não fazia parte do gate nem do deployment registrados acima.

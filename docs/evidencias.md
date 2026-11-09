@@ -142,9 +142,9 @@ Os caminhos de teste são relativos a `tests/e2e/` (E2E Playwright, desktop
 
 | Requisito | Implementação | Evidência | Status | Lacuna |
 |---|---|---|---|---|
-| Início e detalhe, mobile e desktop, 3 execuções, medianas | `scripts/lighthouse.mjs` | `reports/lighthouse/` (relatórios **anteriores** a esta integração) | Pendente | Auditoria final executada no commit `347e855` |
-| Metas P≥90, A≥95, BP≥95, SEO≥90 | Script termina com exit 1 se alguma meta falhar | Auditoria final: performance mobile 55 (início) e 61 (detalhe); desktop 97/98; A100, BP96, SEO92 | Aberto | Performance mobile abaixo de 90 nos relatórios anteriores; confirmado na auditoria final; causas em ARCHITECTURE.md |
-| LCP, CLS, TBT e causas | `summary.md`/`summary.json` | Relatórios anteriores: LCP 5,6 s / 4,8 s; TBT 952 / 909 ms; CLS 0 | Pendente | Causas atualizadas dependem da auditoria final |
+| Início e detalhe, mobile e desktop, 3 execuções, medianas | `scripts/lighthouse.mjs` | `reports/lighthouse/`, auditoria final no commit `347e855` | Coberto | — |
+| Metas P≥90, A≥95, BP≥95, SEO≥90 | Script termina com exit 1 se alguma meta falhar | Auditoria final: performance mobile 55 (início) e 61 (detalhe); desktop 97/98; A100, BP96, SEO92 | Aberto | Performance mobile abaixo de 90 na auditoria final; causas em ARCHITECTURE.md |
+| LCP, CLS, TBT e causas | `summary.md`/`summary.json` | Auditoria final (`347e855`), em `reports/lighthouse/summary.md` e ARCHITECTURE.md | Coberto | — |
 | Sem simplificação exclusiva da auditoria | Mesmo build da demo, com MSW, fontes, imagens e Socket.IO | `scripts/lighthouse.mjs` | Coberto | — |
 
 ## Entrega (§12)
@@ -169,3 +169,5 @@ Gate final executado em 09/11/2026 no commit `347e855`.
 | `pnpm audit:lighthouse` | Executado; performance mobile 55/61 abaixo de 90 (aberto); demais metas atingidas |
 | E2E contra o deploy público | 54/54 aprovados contra https://racing-sable-eislhs3.vercel.app (catalog, purchase, realtime, realtime-consistency, session; desktop + mobile), deployment `dpl_4rj3VyLq1fLRud8NAmfwdzd4W4QJ` construído de `93367bc`; acesso direto a /, /nft/:id, /pagamento, /perfil, /carteiras, /pedido/:id retorna 200 |
 | Commit validado | `347e855` |
+
+O commit `59e8ed3` (posterior ao gate em `347e855` e ao deployment `dpl_4rj3VyLq…`, construído de `93367bc`) ajusta o badge do carrinho no cabeçalho e a linha da tabela do carrinho (células com fundo e cantos arredondados, imagem de 64 px); as baselines `carrinho` e `pagamento` desktop foram atualizadas só por essas duas mudanças. Não reexecutado no gate nem publicado no deployment acima.

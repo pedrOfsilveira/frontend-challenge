@@ -55,8 +55,7 @@ pnpm test:e2e
 ```
 
 Arquivos ignorados (`node_modules/`, `dist/`, `src/routeTree.gen.ts`, relatórios)
-são gerados por esses comandos. Resultado na revisão entregue: pendente de validação final.
-Checkout limpo (clone novo do commit `347e855`, 09/11/2026): `pnpm install --frozen-lockfile --ignore-scripts`, typecheck, lint, Vitest 47/47 e build aprovados; `NOTES/` ausente.
+são gerados por esses comandos. Checkout limpo (clone novo do commit `347e855`, 09/11/2026): `pnpm install --frozen-lockfile --ignore-scripts`, typecheck, lint, Vitest 47/47 e build aprovados; `NOTES/` ausente.
 
 ## Execução isolada em paralelo
 
@@ -142,5 +141,4 @@ imagens, fontes, MSW ou Socket.IO. Grava HTML/JSON de cada execução,
 `reports/lighthouse/`. Termina com exit 1 se alguma mediana ficar abaixo das
 metas (P 90, A 95, BP 95, SEO 90). Aceita `CHROME_PATH` e `LIGHTHOUSE_BASE_URL`.
 
-Os relatórios versionados hoje são anteriores à versão final. A auditoria do
-build final foi executada em 09/11/2026 no commit `347e855` (relatórios em `reports/lighthouse/`).
+A auditoria do build final foi executada em 09/11/2026 no commit `347e855` (relatórios em `reports/lighthouse/`).
