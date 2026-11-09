@@ -42,6 +42,8 @@ let requestCount = 0
 const routeCounts = new Map<string, number>()
 let latencyOverride: number | null = null
 const failures: { route: string; kind: FailureKind; remaining: number }[] = []
+/** Respostas já calculadas e retidas por rota (ver `holdNext`). */
+const holds = new Map<string, { remaining: number; waiting: (() => void)[] }>()
 
 export const network = {
   scenarios: SCENARIOS,
@@ -65,7 +67,32 @@ export const network = {
   failNext(route: string, kind: FailureKind, count = 1) {
     failures.push({ route, kind, remaining: count })
   },
+  /**
+   * As próximas `count` respostas da rota são calculadas normalmente (com o estado daquele
+   * instante) e ficam retidas, sem chegar ao cliente, até `releaseHeld(route)`.
+   */
+  holdNext(route: string, count = 1) {
+    const hold = holds.get(route) ?? { remaining: 0, waiting: [] }
+    hold.remaining += count
+    holds.set(route, hold)
+  },
+  /** Quantas respostas da rota já foram calculadas e estão retidas. */
+  heldCount: (route: string) => holds.get(route)?.waiting.length ?? 0,
+  /** Entrega as respostas retidas da rota e cancela as retenções que sobraram. */
+  releaseHeld(route: string) {
+    const hold = holds.get(route)
+    holds.delete(route)
+    hold?.waiting.forEach((release) => release())
+  },
+  /** Chamado pelo handler depois de calcular a resposta. */
+  async holdIfPlanned(route: string) {
+    const hold = holds.get(route)
+    if (!hold || hold.remaining === 0) return
+    hold.remaining -= 1
+    await new Promise<void>((resolve) => hold.waiting.push(resolve))
+  },
   reset() {
+    ;[...holds.keys()].forEach((route) => network.releaseHeld(route))
     random = seededRandom(SEED)
     requestCount = 0
     routeCounts.clear()

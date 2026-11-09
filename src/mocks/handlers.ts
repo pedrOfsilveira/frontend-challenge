@@ -86,6 +86,8 @@ function endpoint(route: string, resolver: Resolver) {
     // A transação já terminou. Atrasar a resposta fora da fila permite que o retry encontre
     // o pedido persistido enquanto a primeira requisição expira no Axios (10 s).
     if (plan.failure === 'timeout-after-commit' && response.ok) await delay(TIMEOUT_DELAY_MS)
+    // Resposta calculada antes de uma mudança e entregue depois (corrida REST × Socket.IO).
+    await network.holdIfPlanned(route)
     return response
   }
 }

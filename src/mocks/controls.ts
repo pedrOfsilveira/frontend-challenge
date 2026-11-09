@@ -43,6 +43,10 @@ export const controls = {
   },
   setLatency: (ms: number | null) => network.setLatency(ms),
   failNext: (route: string, kind: FailureKind, count = 1) => network.failNext(route, kind, count),
+  /** Retém as próximas respostas da rota já calculadas (estado daquele instante) até `releaseHeld`. */
+  holdNext: (route: string, count = 1) => network.holdNext(route, count),
+  heldCount: (route: string) => network.heldCount(route),
+  releaseHeld: (route: string) => network.releaseHeld(route),
 
   setPaymentOutcome: (outcome: PaymentOutcome) => mutate(() => void (store.get().settings.paymentOutcome = outcome)),
   setPaymentDelay: (ms: number) => mutate(() => void (store.get().settings.paymentDelayMs = Math.max(0, ms))),
