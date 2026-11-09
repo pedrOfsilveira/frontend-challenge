@@ -8,6 +8,7 @@ export function MobilePurchaseBar({ children }: { children: ReactNode }) {
     const bar = ref.current
     const page = bar?.closest<HTMLElement>('[data-nft-page]')
     if (!bar || !page) return
+    const root = document.documentElement
 
     const update = () => {
       const height = bar.getBoundingClientRect().height
@@ -15,6 +16,8 @@ export function MobilePurchaseBar({ children }: { children: ReactNode }) {
       const inFlow = height > viewportHeight / 2
       bar.dataset.flow = String(inFlow)
       page.style.setProperty('--purchase-bar-height', inFlow ? '0px' : `${height}px`)
+      // Foco por teclado não pode parar atrás da barra fixa (WCAG 2.4.11): a rolagem do foco desconta a altura dela.
+      root.style.scrollPaddingBottom = inFlow ? '' : `${height}px`
     }
     const observer = new ResizeObserver(update)
     observer.observe(bar)
@@ -26,6 +29,7 @@ export function MobilePurchaseBar({ children }: { children: ReactNode }) {
       window.removeEventListener('resize', update)
       window.visualViewport?.removeEventListener('resize', update)
       page.style.removeProperty('--purchase-bar-height')
+      root.style.scrollPaddingBottom = ''
     }
   }, [])
 
