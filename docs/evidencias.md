@@ -167,5 +167,5 @@ Gate final executado em 09/11/2026 no commit `347e855`.
 | `pnpm test` (Vitest) | 47/47 aprovados (7 arquivos) |
 | `pnpm test:e2e` (desktop + mobile, sem atualizar baselines) | 141 aprovados, 5 ignorados por projeto, 0 falhas (8 falhas esperadas documentadas) |
 | `pnpm audit:lighthouse` | Executado; performance mobile 55/61 abaixo de 90 (aberto); demais metas atingidas |
-| E2E contra o deploy público | SMOKE_PLACEHOLDER |
+| E2E contra o deploy público | 54/54 aprovados contra https://racing-sable-eislhs3.vercel.app (catalog, purchase, realtime, realtime-consistency, session; desktop + mobile), deployment `dpl_4rj3VyLq1fLRud8NAmfwdzd4W4QJ` construído de `93367bc`; acesso direto a /, /nft/:id, /pagamento, /perfil, /carteiras, /pedido/:id retorna 200 |
 | Commit validado | `347e855` |
