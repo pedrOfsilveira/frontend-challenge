@@ -2,10 +2,11 @@ import type { QueryClient } from '@tanstack/react-query'
 import type { Socket } from 'socket.io-client'
 import { nftUpdatedEvent, orderUpdatedEvent, REALTIME_EVENTS, REALTIME_PATH, type RealtimeEvent } from '@/api/contracts'
 import { whenTransportReady } from '@/api/http'
-import { privateScope, queryKeys } from '@/api/query-keys'
+import { privateScope } from '@/api/query-keys'
 import { sessionStore } from '@/api/session-store'
 import { applyRealtimeEvent, type RealtimeNotice } from './apply'
 import { createLedger } from './ledger'
+import { createRefresher, reconcileAfterConnect } from './refresh'
 
 export type RealtimeStatus = 'idle' | 'connecting' | 'connected' | 'reconnecting' | 'offline'
 
@@ -35,16 +36,6 @@ export function onRealtimeNotice(listener: (notice: RealtimeNotice) => void) {
 const realtimeUrl = import.meta.env.VITE_REALTIME_URL ?? location.origin
 
 /**
- * Atualiza só o que já está carregado e parado: o que está em voo já vai trazer o estado novo,
- * e cancelar/refazer toda requisição da primeira carga custaria LCP à toa.
- */
-function reconcile(queryClient: QueryClient) {
-  const loaded = { refetchType: 'active' as const, predicate: (q: { state: { status: string; fetchStatus: string } }) => q.state.status === 'success' && q.state.fetchStatus === 'idle' }
-  void queryClient.invalidateQueries({ queryKey: queryKeys.nfts.all, ...loaded })
-  void queryClient.invalidateQueries({ queryKey: queryKeys.private.scope(privateScope()), ...loaded })
-}
-
-/**
  * Liga o Socket.IO ao cache do TanStack Query e devolve a função que desliga tudo.
  *
  * - `socket.io-client` é importado só depois do MSW ativo: o engine.io guarda a referência de
@@ -58,6 +49,7 @@ export function startRealtime(queryClient: QueryClient): () => void {
   let socket: Socket | null = null
   let lastToken = sessionStore.getToken()
   const ledger = createLedger()
+  const refresher = createRefresher(queryClient)
 
   const handle = (event: RealtimeEvent) => {
     const session = sessionStore.get()
@@ -67,6 +59,7 @@ export function startRealtime(queryClient: QueryClient): () => void {
       userId: session?.userId ?? null,
       scope: privateScope(session),
       notify: (notice) => noticeListeners.forEach((listener) => listener(notice)),
+      refresh: (filters) => refresher.refresh(filters),
     })
   }
   const validated =
@@ -92,7 +85,7 @@ export function startRealtime(queryClient: QueryClient): () => void {
       socket = s
       s.on('connect', () => {
         setStatus('connected')
-        reconcile(queryClient)
+        reconcileAfterConnect(refresher, privateScope())
       })
       s.on('disconnect', () => setStatus(s.active ? 'reconnecting' : 'offline'))
       s.on('connect_error', () => setStatus(s.active ? 'reconnecting' : 'offline'))
@@ -119,6 +112,7 @@ export function startRealtime(queryClient: QueryClient): () => void {
   return () => {
     disposed = true
     unsubscribeSession()
+    refresher.dispose()
     socket?.removeAllListeners()
     socket?.disconnect()
     socket = null
