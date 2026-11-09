@@ -188,3 +188,6 @@ vercel deploy --project racing-sable-eislhs3 --scope pedrofsilveiras-projects
 # Após validar o preview:
 vercel promote <deployment-url> --scope pedrofsilveiras-projects
 ```
+
+> **Atualização final (09/11/2026, commit `a311ea4`):** inclui ajuste do badge/linha do carrinho (59e8ed3), remoção de layout forçado no primeiro render (798e350) e correções de acessibilidade W2B-R1 (foco volta a "Confirmar compra" ao fechar a revisão) e W2B-R4 (total mobile anunciado). Gate nesse commit: typecheck, lint e build aprovados; Vitest 47/47; Playwright 141 aprovados, 5 ignorados por projeto, 0 falhas. Pendências de acessibilidade ainda abertas (com `test.fail`): W2B-R3, W2B-R5, W2B-R6. Lighthouse registrado acima é do commit `347e855`; a mudança de performance posterior não foi medida em condições limpas.
+
