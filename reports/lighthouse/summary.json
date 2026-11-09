@@ -1,6 +1,6 @@
 {
-  "measuredAt": "2026-11-08T21:01:01.806Z",
-  "baseURL": "http://127.0.0.1:4175",
+  "measuredAt": "2026-11-09T12:28:57.159Z",
+  "baseURL": "http://127.0.0.1:4184",
   "environment": {
     "node": "v26.13.0",
     "platform": "linux",
@@ -8,9 +8,9 @@
     "arch": "x64",
     "cpu": "13th Gen Intel(R) Core(TM) i7-1355U",
     "cores": 12,
-    "memoryBytes": 16430272512,
+    "memoryBytes": 16430280704,
     "chromePath": "/home/pedro/.cache/ms-playwright/chromium-1254/chrome-linux64/chrome",
-    "conditions": "Build de produção, cenário padrão dos mocks, sem sessão, Chrome novo por execução, throttling padrão mobile ou preset desktop; três medições sequenciais por página/perfil."
+    "conditions": "Build de produção, cenário padrão dos mocks, sem sessão, Chrome novo por execução, throttling padrão mobile ou preset desktop; 3 medições sequenciais por página/perfil."
   },
   "targets": {
     "performance": 90,
@@ -26,14 +26,14 @@
       "runs": [
         {
           "scores": {
-            "performance": 48,
+            "performance": 51,
             "accessibility": 100,
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 5815.285125,
+          "lcpMs": 5562.769850000001,
           "cls": 0,
-          "tbtMs": 1607.102125,
+          "tbtMs": 1256.8033500000001,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -103,9 +103,9 @@
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 5644.29965,
+          "lcpMs": 5570.306149999999,
           "cls": 0,
-          "tbtMs": 951.5,
+          "tbtMs": 919.3410999999996,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -170,14 +170,14 @@
         },
         {
           "scores": {
-            "performance": 58,
+            "performance": 55,
             "accessibility": 100,
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 5495.217675,
+          "lcpMs": 5579.427100000001,
           "cls": 0,
-          "tbtMs": 887.7949500000009,
+          "tbtMs": 906.9494000000004,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -246,9 +246,9 @@
         "accessibility": 100,
         "best-practices": 96,
         "seo": 92,
-        "lcpMs": 5644.29965,
+        "lcpMs": 5570.306149999999,
         "cls": 0,
-        "tbtMs": 951.5
+        "tbtMs": 919.3410999999996
       }
     },
     {
@@ -258,86 +258,14 @@
       "runs": [
         {
           "scores": {
-            "performance": 98,
+            "performance": 97,
             "accessibility": 100,
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 1071.0746,
+          "lcpMs": 1139.22075,
           "cls": 0,
-          "tbtMs": 67.99999999999994,
-          "lighthouseVersion": "13.6.0",
-          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
-          "settings": {
-            "output": [
-              "html",
-              "json"
-            ],
-            "maxWaitForFcp": 30000,
-            "maxWaitForLoad": 45000,
-            "pauseAfterFcpMs": 1000,
-            "pauseAfterLoadMs": 1000,
-            "networkQuietThresholdMs": 1000,
-            "cpuQuietThresholdMs": 1000,
-            "formFactor": "desktop",
-            "throttling": {
-              "rttMs": 40,
-              "throughputKbps": 10240,
-              "requestLatencyMs": 0,
-              "downloadThroughputKbps": 0,
-              "uploadThroughputKbps": 0,
-              "cpuSlowdownMultiplier": 1
-            },
-            "throttlingMethod": "simulate",
-            "screenEmulation": {
-              "mobile": false,
-              "width": 1350,
-              "height": 940,
-              "deviceScaleFactor": 1,
-              "disabled": false
-            },
-            "emulatedUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
-            "auditMode": false,
-            "gatherMode": false,
-            "clearStorageTypes": [
-              "file_systems",
-              "shader_cache",
-              "service_workers",
-              "cache_storage"
-            ],
-            "disableStorageReset": false,
-            "debugNavigation": false,
-            "channel": "cli",
-            "usePassiveGathering": false,
-            "disableFullPageScreenshot": false,
-            "skipAboutBlank": false,
-            "blankPage": "about:blank",
-            "ignoreStatusCode": false,
-            "locale": "en-US",
-            "blockedUrlPatterns": null,
-            "additionalTraceCategories": null,
-            "extraHeaders": null,
-            "precomputedLanternData": null,
-            "onlyAudits": null,
-            "onlyCategories": [
-              "performance",
-              "accessibility",
-              "best-practices",
-              "seo"
-            ],
-            "skipAudits": null
-          }
-        },
-        {
-          "scores": {
-            "performance": 96,
-            "accessibility": 100,
-            "best-practices": 96,
-            "seo": 92
-          },
-          "lcpMs": 1145.859125,
-          "cls": 0,
-          "tbtMs": 114.5,
+          "tbtMs": 71.3655,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -407,9 +335,81 @@
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 1141.2717,
+          "lcpMs": 1128.76515,
           "cls": 0,
-          "tbtMs": 93.5,
+          "tbtMs": 79.06709999999998,
+          "lighthouseVersion": "13.6.0",
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
+          "settings": {
+            "output": [
+              "html",
+              "json"
+            ],
+            "maxWaitForFcp": 30000,
+            "maxWaitForLoad": 45000,
+            "pauseAfterFcpMs": 1000,
+            "pauseAfterLoadMs": 1000,
+            "networkQuietThresholdMs": 1000,
+            "cpuQuietThresholdMs": 1000,
+            "formFactor": "desktop",
+            "throttling": {
+              "rttMs": 40,
+              "throughputKbps": 10240,
+              "requestLatencyMs": 0,
+              "downloadThroughputKbps": 0,
+              "uploadThroughputKbps": 0,
+              "cpuSlowdownMultiplier": 1
+            },
+            "throttlingMethod": "simulate",
+            "screenEmulation": {
+              "mobile": false,
+              "width": 1350,
+              "height": 940,
+              "deviceScaleFactor": 1,
+              "disabled": false
+            },
+            "emulatedUserAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
+            "auditMode": false,
+            "gatherMode": false,
+            "clearStorageTypes": [
+              "file_systems",
+              "shader_cache",
+              "service_workers",
+              "cache_storage"
+            ],
+            "disableStorageReset": false,
+            "debugNavigation": false,
+            "channel": "cli",
+            "usePassiveGathering": false,
+            "disableFullPageScreenshot": false,
+            "skipAboutBlank": false,
+            "blankPage": "about:blank",
+            "ignoreStatusCode": false,
+            "locale": "en-US",
+            "blockedUrlPatterns": null,
+            "additionalTraceCategories": null,
+            "extraHeaders": null,
+            "precomputedLanternData": null,
+            "onlyAudits": null,
+            "onlyCategories": [
+              "performance",
+              "accessibility",
+              "best-practices",
+              "seo"
+            ],
+            "skipAudits": null
+          }
+        },
+        {
+          "scores": {
+            "performance": 97,
+            "accessibility": 100,
+            "best-practices": 96,
+            "seo": 92
+          },
+          "lcpMs": 1127.0442750000002,
+          "cls": 0,
+          "tbtMs": 69.48734999999999,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -478,9 +478,9 @@
         "accessibility": 100,
         "best-practices": 96,
         "seo": 92,
-        "lcpMs": 1141.2717,
+        "lcpMs": 1128.76515,
         "cls": 0,
-        "tbtMs": 93.5
+        "tbtMs": 71.3655
       }
     },
     {
@@ -490,14 +490,14 @@
       "runs": [
         {
           "scores": {
-            "performance": 62,
+            "performance": 61,
             "accessibility": 100,
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 4847.4588,
+          "lcpMs": 5172.3652,
           "cls": 0,
-          "tbtMs": 909,
+          "tbtMs": 878,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -562,14 +562,14 @@
         },
         {
           "scores": {
-            "performance": 62,
+            "performance": 64,
             "accessibility": 100,
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 4920.895399999999,
+          "lcpMs": 4927.6288,
           "cls": 0,
-          "tbtMs": 818.9999999999995,
+          "tbtMs": 757,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -639,9 +639,9 @@
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 4717.5761999999995,
+          "lcpMs": 4942.3454,
           "cls": 0,
-          "tbtMs": 990.4999999999995,
+          "tbtMs": 933.9999999999995,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -706,13 +706,13 @@
         }
       ],
       "median": {
-        "performance": 62,
+        "performance": 61,
         "accessibility": 100,
         "best-practices": 96,
         "seo": 92,
-        "lcpMs": 4847.4588,
+        "lcpMs": 4942.3454,
         "cls": 0,
-        "tbtMs": 909
+        "tbtMs": 878
       }
     },
     {
@@ -722,14 +722,14 @@
       "runs": [
         {
           "scores": {
-            "performance": 98,
+            "performance": 95,
             "accessibility": 100,
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 1017.3926000000001,
+          "lcpMs": 1175.7896,
           "cls": 0,
-          "tbtMs": 80,
+          "tbtMs": 145,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -799,9 +799,9 @@
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 1008.5166,
+          "lcpMs": 1098.482,
           "cls": 0,
-          "tbtMs": 101,
+          "tbtMs": 51,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -871,9 +871,9 @@
             "best-practices": 96,
             "seo": 92
           },
-          "lcpMs": 1073.6842000000001,
+          "lcpMs": 1100.1999999999998,
           "cls": 0,
-          "tbtMs": 78,
+          "tbtMs": 74.00000000000011,
           "lighthouseVersion": "13.6.0",
           "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.0.0 Safari/537.36",
           "settings": {
@@ -942,9 +942,9 @@
         "accessibility": 100,
         "best-practices": 96,
         "seo": 92,
-        "lcpMs": 1017.3926000000001,
+        "lcpMs": 1100.1999999999998,
         "cls": 0,
-        "tbtMs": 80
+        "tbtMs": 74.00000000000011
       }
     }
   ]

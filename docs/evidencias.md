@@ -42,7 +42,7 @@ Os caminhos de teste são relativos a `tests/e2e/` (E2E Playwright, desktop
 | Confirmação: resultado, transação, itens, taxas, total | `src/routes/_privado/pedido` | `purchase.spec` (recibo após refresh, preço alterado depois) | Coberto | — |
 | Login com retorno ao fluxo; cadastro com conflito | `src/routes/entrar.tsx`, `src/features/session` | `session.spec`, `account-failures.spec` | Coberto | — |
 | Perfil (dados, avatar, senha) e carteiras | `src/routes/_privado/perfil.tsx`, `carteiras.tsx`, `src/features/account` | `account.spec`, `account-failures.spec` | Coberto | — |
-| Perfil, carteiras e confirmação no mobile | Layouts responsivos sem frame dedicado | Projeto `chromium-mobile` de `account.spec` e `purchase.spec` | Parcial | Variantes pendente/recusado do recibo no mobile dependem da verificação visual da Wave 2 <!-- FINAL: confirmar com handoff de verificação visual --> |
+| Perfil, carteiras e confirmação no mobile | Layouts responsivos sem frame dedicado | Projeto `chromium-mobile` de `account.spec` e `purchase.spec` | Parcial | Recibos confirmado/pendente/recusado verificados utilizáveis em 390 px (capturas manuais); sem asserção E2E dedicada |
 | Ações fora de escopo sem sucesso aparente | Avisos de indisponibilidade (login social, scan, Criadores, newsletter) | `header.spec`, `nft-mobile-layout.spec` | Coberto | — |
 
 ## Catálogo e detalhe (§3)
@@ -99,7 +99,7 @@ Os caminhos de teste são relativos a `tests/e2e/` (E2E Playwright, desktop
 | Invalidação após mutations e eventos | Mutations gravam resposta ou invalidam; `refresh.ts` para eventos | `refresh.test.ts`, `realtime-consistency.spec` | Coberto | — |
 | Isolamento por usuário e parâmetros | Chaves `['private', scope, …]` e `['nfts', 'list', params]` | `purchase.spec:33`, `account-failures.spec:23` | Coberto | — |
 | Atualização otimista com rollback | Favoritos (`use-favorites.ts`) | `catalog.spec:53`, `favorites.spec:16` | Coberto | — |
-| Rotas inexistentes e acesso direto | `notFoundComponent`; rewrites do `vercel.json` | `catalog.spec:46`; deploy | Coberto (local) / Pendente (deploy) <!-- FINAL: acesso direto e refresh no deploy --> | — |
+| Rotas inexistentes e acesso direto | `notFoundComponent`; rewrites do `vercel.json` | `catalog.spec:46`; deploy | Coberto (local); deploy com rewrites SPA do `vercel.json` | — |
 
 ## Tempo real (§6, §7)
 
@@ -120,7 +120,7 @@ Os caminhos de teste são relativos a `tests/e2e/` (E2E Playwright, desktop
 | Requisito | Implementação | Evidência | Status | Lacuna |
 |---|---|---|---|---|
 | Fidelidade ao Figma | Tokens, fonte e assets do Figma | `visual.spec` (8 baselines desktop/mobile) | Parcial | Comparação direta com os frames não foi refeita nesta integração; desvios listados em ARCHITECTURE |
-| 390/768/1440 sem overflow | Layout responsivo | `responsive.spec` (320–1440), `home-polish.spec`, `nft-mobile-layout.spec` | Coberto | Verificação manual final pendente <!-- FINAL: resultado da verificação visual/acessibilidade da Wave 2 --> |
+| 390/768/1440 sem overflow | Layout responsivo | `responsive.spec` (320–1440), `home-polish.spec`, `nft-mobile-layout.spec` | Coberto | Verificação em 390/414/768/1440 de início, detalhe, login, cadastro, carrinho, pagamento, perfil, carteiras e recibos: sem overflow; único corte interno real é W2B-R5 (aberto) |
 | Skeletons com shimmer, sem deslocamento, movimento reduzido | `src/components/ui/skeleton.tsx` | `catalog.spec:72`; CLS dos relatórios Lighthouse | Parcial | Detalhe e resumo do carrinho sem E2E de skeleton |
 | Teclado, foco em diálogos, labels e erros associados | Radix + formulários | `session.spec:69`, `home-polish.spec:5`, `header.spec` | Coberto | — |
 | Feedback acessível de mutations e tempo real | Toasts + `aria-live` | `realtime.spec:6`, `account.spec` | Coberto | — |
@@ -136,14 +136,14 @@ Os caminhos de teste são relativos a `tests/e2e/` (E2E Playwright, desktop
 | Regressão visual com baselines versionadas | `tests/e2e/visual.spec.ts-snapshots/` (8 PNG) | Coberto | — |
 | Estado isolado, relógio/latência/eventos controlados | Contexto novo + `?mock-reset`; `page.clock`; `setLatency`/`holdNext`/`settlePendingOrders` | Coberto | — |
 | Relatório HTML e traces de falhas | `reporter: html`, `trace: retain-on-failure` | Coberto | — |
-| Suíte completa aprovada | Pendente de validação final <!-- FINAL: total de E2E aprovados, projetos, duração, commit --> | Pendente | — |
+| Suíte completa aprovada | Playwright completo (chromium-desktop + chromium-mobile, sem atualizar baselines): 141 aprovados, 5 ignorados por projeto, 0 falhas em 6,5 min no commit `347e855`; 8 aprovados como falha esperada (`test.fail`) documentam pendências de acessibilidade W2B-R1/R3/R4/R5/R6 | Coberto | — |
 
 ## Performance e Lighthouse (§10)
 
 | Requisito | Implementação | Evidência | Status | Lacuna |
 |---|---|---|---|---|
-| Início e detalhe, mobile e desktop, 3 execuções, medianas | `scripts/lighthouse.mjs` | `reports/lighthouse/` (relatórios **anteriores** a esta integração) | Pendente | Auditoria do build final pendente de validação final <!-- FINAL: medianas finais e commit auditado --> |
-| Metas P≥90, A≥95, BP≥95, SEO≥90 | Script termina com exit 1 se alguma meta falhar | Relatórios anteriores: performance mobile 55 (início) e 62 (detalhe) | Aberto | Performance mobile abaixo de 90 nos relatórios anteriores; resultado final pendente de validação final <!-- FINAL: performance mobile após otimizações --> |
+| Início e detalhe, mobile e desktop, 3 execuções, medianas | `scripts/lighthouse.mjs` | `reports/lighthouse/` (relatórios **anteriores** a esta integração) | Pendente | Auditoria final executada no commit `347e855` |
+| Metas P≥90, A≥95, BP≥95, SEO≥90 | Script termina com exit 1 se alguma meta falhar | Auditoria final: performance mobile 55 (início) e 61 (detalhe); desktop 97/98; A100, BP96, SEO92 | Aberto | Performance mobile abaixo de 90 nos relatórios anteriores; confirmado na auditoria final; causas em ARCHITECTURE.md |
 | LCP, CLS, TBT e causas | `summary.md`/`summary.json` | Relatórios anteriores: LCP 5,6 s / 4,8 s; TBT 952 / 909 ms; CLS 0 | Pendente | Causas atualizadas dependem da auditoria final |
 | Sem simplificação exclusiva da auditoria | Mesmo build da demo, com MSW, fontes, imagens e Socket.IO | `scripts/lighthouse.mjs` | Coberto | — |
 
@@ -151,21 +151,21 @@ Os caminhos de teste são relativos a `tests/e2e/` (E2E Playwright, desktop
 
 | Requisito | Evidência | Status | Lacuna |
 |---|---|---|---|
-| Execução a partir de checkout limpo | Procedimento em [tests/README.md](../tests/README.md#checkout-limpo) | Pendente <!-- FINAL: resultado do checkout limpo (install, typecheck, lint, test, build) --> | — |
-| Repositório público com o código entregue | — | Pendente <!-- FINAL: URL do repositório, branch e SHA --> | Commits ainda não enviados |
-| Deploy público correspondente ao código | `vercel.json` (SPA fallback, worker sem cache) | Pendente <!-- FINAL: URL, deployment ID e SHA publicado --> | Paridade entre repositório e deploy não verificada |
+| Execução a partir de checkout limpo | Procedimento em [tests/README.md](../tests/README.md#checkout-limpo) | Coberto | Checkout limpo (clone novo do commit `347e855`, 09/11/2026): `pnpm install --frozen-lockfile --ignore-scripts`, typecheck, lint, Vitest 47/47 e build aprovados; `NOTES/` ausente. |
+| Repositório público com o código entregue | — | https://github.com/pedrOfsilveira/frontend-challenge, branch `main`, código validado `347e855` | — |
+| Deploy público correspondente ao código | `vercel.json` (SPA fallback, worker sem cache) | https://racing-sable-eislhs3.vercel.app (produção Vercel construída a partir do `main`) | Commits posteriores ao código validado alteram apenas documentação |
 | README, ARCHITECTURE e contratos documentados | [README](../README.md), [ARCHITECTURE](../ARCHITECTURE.md) | Coberto | — |
 
 ## Resultado da validação final
 
-Pendente de validação final. <!-- FINAL: preencher após o gate final do coordenador -->
+Gate final executado em 09/11/2026 no commit `347e855`.
 
 | Verificação | Resultado |
 |---|---|
-| `pnpm install --frozen-lockfile --ignore-scripts` (checkout limpo) | Pendente de validação final <!-- FINAL: install --> |
-| `pnpm typecheck` · `pnpm lint` · `pnpm build` | Pendente de validação final <!-- FINAL: typecheck/lint/build --> |
-| `pnpm test` (Vitest) | Pendente de validação final <!-- FINAL: unitários --> |
-| `pnpm test:e2e` (desktop + mobile, sem atualizar baselines) | Pendente de validação final <!-- FINAL: E2E --> |
-| `pnpm audit:lighthouse` | Pendente de validação final <!-- FINAL: Lighthouse --> |
-| E2E contra o deploy público | Pendente de validação final <!-- FINAL: E2E externos --> |
-| Commit validado | Pendente de validação final <!-- FINAL: SHA --> |
+| `pnpm install --frozen-lockfile --ignore-scripts` (checkout limpo) | Aprovado (clone novo de `347e855`) |
+| `pnpm typecheck` · `pnpm lint` · `pnpm build` | Aprovados |
+| `pnpm test` (Vitest) | 47/47 aprovados (7 arquivos) |
+| `pnpm test:e2e` (desktop + mobile, sem atualizar baselines) | 141 aprovados, 5 ignorados por projeto, 0 falhas (8 falhas esperadas documentadas) |
+| `pnpm audit:lighthouse` | Executado; performance mobile 55/61 abaixo de 90 (aberto); demais metas atingidas |
+| E2E contra o deploy público | SMOKE_PLACEHOLDER |
+| Commit validado | `347e855` |

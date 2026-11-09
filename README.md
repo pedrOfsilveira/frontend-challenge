@@ -152,7 +152,7 @@ Detalhes, execução isolada em paralelo e checkout limpo: [tests/README.md](tes
 
 ## Estado da verificação
 
-Pendente de validação final. <!-- FINAL: resumo dos resultados do gate final (commit, typecheck/lint/build, unitários, E2E, Lighthouse) -->
+Gate final no commit `347e855`: typecheck, lint e build aprovados; Vitest 47/47; Playwright completo (chromium-desktop + chromium-mobile, sem atualizar baselines): 141 aprovados, 5 ignorados por projeto, 0 falhas em 6,5 min no commit `347e855`; 8 aprovados como falha esperada (`test.fail`) documentam pendências de acessibilidade W2B-R1/R3/R4/R5/R6.
 Os números finais de testes e auditoria só serão registrados depois que o
 código for congelado. A matriz em [docs/evidencias.md](docs/evidencias.md)
 indica o que cada requisito tem como evidência e o que ainda falta.
@@ -161,7 +161,7 @@ Os relatórios em `reports/lighthouse/` são **anteriores** às mudanças desta
 integração e não medem a versão final. Neles, a performance mobile ficou abaixo
 da meta de 90 (início 55, detalhe 62); desktop 97–98; acessibilidade 100, boas
 práticas 96, SEO 92. A auditoria do build final está pendente de validação final.
-<!-- FINAL: medianas da auditoria final e metas não atingidas -->
+Medianas de 3 execuções (09/11/2026, commit `347e855`, preview local, Lighthouse via `pnpm audit:lighthouse`): início mobile P55/A100/BP96/SEO92, LCP 5.570 ms, CLS 0, TBT 919 ms; início desktop P97/A100/BP96/SEO92, LCP 1.129 ms, TBT 71 ms; detalhe mobile P61/A100/BP96/SEO92, LCP 4.942 ms, CLS 0, TBT 878 ms; detalhe desktop P98/A100/BP96/SEO92, LCP 1.100 ms, TBT 74 ms. Meta de performance mobile (≥90) **não atingida**. Causas medidas: primeiro render do React (~2,1 s de scripting a 4× CPU, com layouts forçados em `use-sliding-indicator` e `MobilePurchaseBar`), chunk HTTP (~600 ms, construção de schemas zod), chunk do mock (~176 KB gzip no caminho crítico do LCP do detalhe, ~77 KB de tough-cookie/tldts) e um GET extra por query em voo no primeiro CONNECT.
 
 ## Publicação
 
@@ -169,11 +169,11 @@ práticas 96, SEO 92. A auditoria do build final está pendente de validação f
 `assets/`, `api/`, `realtime/` e o worker) e `no-cache` no worker. O build
 publicado usa `.env.production`, com mocks ativos.
 
-- Repositório: https://github.com/pedrOfsilveira/frontend-challenge. Revisão entregue pendente de validação final. <!-- FINAL: branch e SHA enviados -->
-- Aplicação: pendente de validação final. <!-- FINAL: URL pública e deployment ID -->
+- Repositório: https://github.com/pedrOfsilveira/frontend-challenge. Branch `main` (mesma revisão em `chore/integracao-wave2-09-11-2026`); código validado no commit `347e855`.
+- Aplicação: https://racing-sable-eislhs3.vercel.app (produção Vercel, build do código validado).
 
 A correspondência entre o código do repositório e a versão publicada ainda não
-foi verificada para esta revisão. <!-- FINAL: confirmar paridade repositório/deploy -->
+foi verificada para esta revisão. (o deploy é feito a partir da revisão enviada ao `main`; commits posteriores, se houver, alteram apenas documentação).
 
 Para publicar no projeto Vercel existente (CLI autenticada na conta proprietária):
 

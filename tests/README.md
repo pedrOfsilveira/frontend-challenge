@@ -1,6 +1,6 @@
 # Testes e auditoria
 
-Os resultados da revisão entregue estão pendentes de validação final. <!-- FINAL: totais por comando e commit validado -->
+Os resultados da revisão entregue foram validados no commit `347e855`: Vitest 47/47; Playwright completo (chromium-desktop + chromium-mobile, sem atualizar baselines): 141 aprovados, 5 ignorados por projeto, 0 falhas em 6,5 min no commit `347e855`; 8 aprovados como falha esperada (`test.fail`) documentam pendências de acessibilidade W2B-R1/R3/R4/R5/R6.
 Este guia descreve como executar as verificações e o que cada uma cobre. Os
 números finais ficam em [docs/evidencias.md](../docs/evidencias.md#resultado-da-validação-final).
 
@@ -56,7 +56,7 @@ pnpm test:e2e
 
 Arquivos ignorados (`node_modules/`, `dist/`, `src/routeTree.gen.ts`, relatórios)
 são gerados por esses comandos. Resultado na revisão entregue: pendente de validação final.
-<!-- FINAL: SHA, data e resultado do checkout limpo -->
+Checkout limpo (clone novo do commit `347e855`, 09/11/2026): `pnpm install --frozen-lockfile --ignore-scripts`, typecheck, lint, Vitest 47/47 e build aprovados; `NOTES/` ausente.
 
 ## Execução isolada em paralelo
 
@@ -143,4 +143,4 @@ imagens, fontes, MSW ou Socket.IO. Grava HTML/JSON de cada execução,
 metas (P 90, A 95, BP 95, SEO 90). Aceita `CHROME_PATH` e `LIGHTHOUSE_BASE_URL`.
 
 Os relatórios versionados hoje são anteriores à versão final. A auditoria do
-build final está pendente de validação final. <!-- FINAL: data/commit da auditoria final em reports/lighthouse -->
+build final foi executada em 09/11/2026 no commit `347e855` (relatórios em `reports/lighthouse/`).

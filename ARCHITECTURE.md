@@ -281,7 +281,7 @@ investigação, não a causa única comprovada. Também desde então, a reconcil
 no CONNECT faz um GET extra por query que estava em voo na primeira carga,
 depois que os dados já aparecem.
 
-Auditoria do build final: pendente de validação final. <!-- FINAL: medianas finais, ambiente/versões, LCP/CLS/TBT e causas das metas não atingidas -->
+Auditoria do build final: Medianas de 3 execuções (09/11/2026, commit `347e855`, preview local, Lighthouse via `pnpm audit:lighthouse`): início mobile P55/A100/BP96/SEO92, LCP 5.570 ms, CLS 0, TBT 919 ms; início desktop P97/A100/BP96/SEO92, LCP 1.129 ms, TBT 71 ms; detalhe mobile P61/A100/BP96/SEO92, LCP 4.942 ms, CLS 0, TBT 878 ms; detalhe desktop P98/A100/BP96/SEO92, LCP 1.100 ms, TBT 74 ms. Meta de performance mobile (≥90) **não atingida**. Causas medidas: primeiro render do React (~2,1 s de scripting a 4× CPU, com layouts forçados em `use-sliding-indicator` e `MobilePurchaseBar`), chunk HTTP (~600 ms, construção de schemas zod), chunk do mock (~176 KB gzip no caminho crítico do LCP do detalhe, ~77 KB de tough-cookie/tldts) e um GET extra por query em voo no primeiro CONNECT.
 Não há modo exclusivo para a auditoria, e nenhuma funcionalidade foi removida
 para melhorar a nota.
 
@@ -322,4 +322,4 @@ porque o worker já está versionado, o que evita `ERR_PNPM_IGNORED_BUILDS`
 sem liberar scripts.
 
 Revisão publicada, URL e paridade com o repositório: pendente de validação final.
-<!-- FINAL: SHA publicado, deployment ID, URL e verificação de paridade -->
+Publicação: https://racing-sable-eislhs3.vercel.app, produção Vercel construída a partir do código validado em `347e855` e enviado ao `main` de https://github.com/pedrOfsilveira/frontend-challenge.
