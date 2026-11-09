@@ -44,10 +44,12 @@ async function applyUrlOptions() {
 }
 
 export async function startMocks() {
-  await store.init()
-  await applyUrlOptions()
+  // O banco (semente com PBKDF2 via WebCrypto) e o registro do service worker são independentes:
+  // correm em paralelo. Nada chega aos handlers antes disso: o Axios e o Socket.IO esperam
+  // `startMocks()` inteiro (ver `setTransportReady`).
+  const seeded = store.init().then(applyUrlOptions)
   const worker = setupWorker(...handlers, realtimeHandler)
-  await worker.start({
+  const started = worker.start({
     quiet: import.meta.env.PROD,
     serviceWorker: { url: `${import.meta.env.BASE_URL}mockServiceWorker.js` },
     onUnhandledRequest(request, print) {
@@ -55,6 +57,7 @@ export async function startMocks() {
       if (new URL(request.url).pathname.startsWith(API_PATH)) print.warning()
     },
   })
+  await Promise.all([seeded, started])
   await serialized(async () => {
     if (resolveDue(store.get())) store.persist()
   })

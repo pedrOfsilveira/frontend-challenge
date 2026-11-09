@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse, type DefaultBodyType, type PathParams, type StrictRequest } from 'msw'
+import { delay, HttpResponse, RequestHandler, type DefaultBodyType, type PathParams, type StrictRequest } from 'msw'
 import {
   addCartItemRequest,
   applyCouponRequest,
@@ -118,137 +118,208 @@ function cartOwner(db: Db, request: Request) {
 
 const param = (params: PathParams, key: string) => String(params[key] ?? '')
 
-export const handlers = [
+interface Route {
+  method: string
+  segments: string[]
+  handle: ReturnType<typeof endpoint>
+}
+const route = (method: string, path: string, name: string, resolver: Resolver): Route => ({
+  method,
+  segments: path.split('/').filter(Boolean),
+  handle: endpoint(name, resolver),
+})
+
+const routes: Route[] = [
   // Sessão e conta
-  http.post(`${API}/auth/register`, endpoint('auth.register', async ({ db, request }) => ({
+  route('POST', '/auth/register', 'auth.register', async ({ db, request }) => ({
     status: 201,
     body: await auth.register(db, validate(registerRequest, await readJson(request)), guestId(request)),
-  }))),
-  http.post(`${API}/auth/login`, endpoint('auth.login', async ({ db, request }) => ({
+  })),
+  route('POST', '/auth/login', 'auth.login', async ({ db, request }) => ({
     body: await auth.login(db, validate(loginRequest, await readJson(request)), guestId(request)),
-  }))),
-  http.get(`${API}/auth/session`, endpoint('auth.session', ({ db, request }) => {
+  })),
+  route('GET', '/auth/session', 'auth.session', ({ db, request }) => {
     const { user, session } = auth.requireUser(db, authHeader(request))
     return { body: { expiresAt: session.expiresAt, user: auth.publicUser(user) } }
-  })),
-  http.post(`${API}/auth/logout`, endpoint('auth.logout', ({ db, request }) => {
+  }),
+  route('POST', '/auth/logout', 'auth.logout', ({ db, request }) => {
     const token = authHeader(request)?.replace(/^Bearer\s+/i, '')
     if (token) auth.logout(db, token)
     return { status: 204, body: null }
-  })),
+  }),
 
   // Catálogo
-  http.get(`${API}/nfts`, endpoint('nfts.list', ({ db, url }) => ({
+  route('GET', '/nfts', 'nfts.list', ({ db, url }) => ({
     body: catalog.listNfts(db, catalog.parseListQuery(url.searchParams), { empty: network.scenario === 'empty' }),
-  }))),
-  http.get(`${API}/nfts/featured`, endpoint('nfts.featured', ({ db }) => ({ body: catalog.featuredNfts(db) }))),
-  http.get(`${API}/nfts/:id`, endpoint('nfts.detail', ({ db, params }) => ({ body: catalog.detail(catalog.findNft(db, param(params, 'id'))) }))),
-  http.get(`${API}/nfts/:id/related`, endpoint('nfts.related', ({ db, params }) => ({ body: catalog.relatedNfts(db, param(params, 'id')) }))),
+  })),
+  route('GET', '/nfts/featured', 'nfts.featured', ({ db }) => ({ body: catalog.featuredNfts(db) })),
+  route('GET', '/nfts/:id', 'nfts.detail', ({ db, params }) => ({ body: catalog.detail(catalog.findNft(db, param(params, 'id'))) })),
+  route('GET', '/nfts/:id/related', 'nfts.related', ({ db, params }) => ({ body: catalog.relatedNfts(db, param(params, 'id')) })),
 
   // Favoritos
-  http.get(`${API}/favorites`, endpoint('favorites.list', ({ db, request }) => ({
+  route('GET', '/favorites', 'favorites.list', ({ db, request }) => ({
     body: account.favorites(db, auth.requireUser(db, authHeader(request)).user.id),
-  }))),
-  http.put(`${API}/favorites/:nftId`, endpoint('favorites.add', ({ db, request, params }) => ({
+  })),
+  route('PUT', '/favorites/:nftId', 'favorites.add', ({ db, request, params }) => ({
     body: account.setFavorite(db, auth.requireUser(db, authHeader(request)).user.id, param(params, 'nftId'), true),
-  }))),
-  http.delete(`${API}/favorites/:nftId`, endpoint('favorites.remove', ({ db, request, params }) => ({
+  })),
+  route('DELETE', '/favorites/:nftId', 'favorites.remove', ({ db, request, params }) => ({
     body: account.setFavorite(db, auth.requireUser(db, authHeader(request)).user.id, param(params, 'nftId'), false),
-  }))),
+  })),
 
   // Carrinho e cotação
-  http.get(`${API}/cart`, endpoint('cart.get', ({ db, request }) => ({
+  route('GET', '/cart', 'cart.get', ({ db, request }) => ({
     body: cartDomain.viewCart(db, cartDomain.getCart(db, cartOwner(db, request))),
-  }))),
-  http.post(`${API}/cart/items`, endpoint('cart.add', async ({ db, request }) => {
+  })),
+  route('POST', '/cart/items', 'cart.add', async ({ db, request }) => {
     const cart = cartDomain.getCart(db, cartOwner(db, request))
     cartDomain.addItem(db, cart, validate(addCartItemRequest, await readJson(request)))
     return { body: cartDomain.viewCart(db, cart) }
-  })),
-  http.patch(`${API}/cart/items/:lineId`, endpoint('cart.update', async ({ db, request, params }) => {
+  }),
+  route('PATCH', '/cart/items/:lineId', 'cart.update', async ({ db, request, params }) => {
     const cart = cartDomain.getCart(db, cartOwner(db, request))
     cartDomain.updateItem(db, cart, param(params, 'lineId'), validate(updateCartItemRequest, await readJson(request)).quantity)
     return { body: cartDomain.viewCart(db, cart) }
-  })),
-  http.delete(`${API}/cart/items/:lineId`, endpoint('cart.remove', ({ db, request, params }) => {
+  }),
+  route('DELETE', '/cart/items/:lineId', 'cart.remove', ({ db, request, params }) => {
     const cart = cartDomain.getCart(db, cartOwner(db, request))
     cartDomain.removeItem(cart, param(params, 'lineId'))
     return { body: cartDomain.viewCart(db, cart) }
-  })),
-  http.put(`${API}/cart/coupon`, endpoint('cart.coupon.apply', async ({ db, request }) => {
+  }),
+  route('PUT', '/cart/coupon', 'cart.coupon.apply', async ({ db, request }) => {
     const cart = cartDomain.getCart(db, cartOwner(db, request))
     cartDomain.applyCoupon(db, cart, validate(applyCouponRequest, await readJson(request)).code)
     return { body: cartDomain.viewCart(db, cart) }
-  })),
-  http.delete(`${API}/cart/coupon`, endpoint('cart.coupon.remove', ({ db, request }) => {
+  }),
+  route('DELETE', '/cart/coupon', 'cart.coupon.remove', ({ db, request }) => {
     const cart = cartDomain.getCart(db, cartOwner(db, request))
     cartDomain.removeCoupon(cart)
     return { body: cartDomain.viewCart(db, cart) }
-  })),
-  http.get(`${API}/cart/quote`, endpoint('cart.quote', ({ db, request, url }) => {
+  }),
+  route('GET', '/cart/quote', 'cart.quote', ({ db, request, url }) => {
     const owner = cartOwner(db, request)
     const networkId = validate(paymentNetwork, url.searchParams.get('network') ?? 'ethereum')
     const sinceId = url.searchParams.get('since')
     const since = sinceId ? db.quotes[sinceId] : null
     const quote = computeQuote(db, cartDomain.getCart(db, owner), networkId, since?.ownerId === owner ? since : null)
     return { body: publicQuote(issueQuote(db, quote)) }
-  })),
+  }),
 
   // Pedidos
-  http.post(`${API}/orders`, endpoint('orders.create', async ({ db, request }) => {
+  route('POST', '/orders', 'orders.create', async ({ db, request }) => {
     const { user } = auth.requireUser(db, authHeader(request))
     const result = orders.createOrder(db, user, request.headers.get(IDEMPOTENCY_HEADER), await readJson(request))
     return { status: result.created ? 201 : 200, body: result.order }
-  })),
-  http.get(`${API}/orders`, endpoint('orders.list', ({ db, request }) => ({
+  }),
+  route('GET', '/orders', 'orders.list', ({ db, request }) => ({
     body: { items: orders.pendingOrders(db, auth.requireUser(db, authHeader(request)).user.id) },
-  }))),
-  http.get(`${API}/orders/:id`, endpoint('orders.get', ({ db, request, params }) => ({
+  })),
+  route('GET', '/orders/:id', 'orders.get', ({ db, request, params }) => ({
     body: orders.viewOrder(orders.findOrder(db, auth.requireUser(db, authHeader(request)).user.id, param(params, 'id'))),
-  }))),
+  })),
 
   // Perfil
-  http.get(`${API}/profile`, endpoint('profile.get', ({ db, request }) => ({
+  route('GET', '/profile', 'profile.get', ({ db, request }) => ({
     body: account.viewProfile(auth.requireUser(db, authHeader(request)).user),
-  }))),
-  http.put(`${API}/profile`, endpoint('profile.update', async ({ db, request }) => {
+  })),
+  route('PUT', '/profile', 'profile.update', async ({ db, request }) => {
     const { user } = auth.requireUser(db, authHeader(request))
     account.updateProfile(db, user, validate(updateProfileRequest, await readJson(request)))
     return { body: account.viewProfile(user) }
-  })),
-  http.put(`${API}/profile/avatar`, endpoint('profile.avatar', async ({ db, request }) => {
+  }),
+  route('PUT', '/profile/avatar', 'profile.avatar', async ({ db, request }) => {
     const { user } = auth.requireUser(db, authHeader(request))
     account.updateAvatar(user, validate(updateAvatarRequest, await readJson(request)).avatarUrl)
     return { body: account.viewProfile(user) }
-  })),
-  http.put(`${API}/profile/password`, endpoint('profile.password', async ({ db, request }) => {
+  }),
+  route('PUT', '/profile/password', 'profile.password', async ({ db, request }) => {
     const { user } = auth.requireUser(db, authHeader(request))
     await account.changePassword(user, validate(changePasswordRequest, await readJson(request)))
     return { status: 204, body: null }
-  })),
+  }),
 
   // Carteiras
-  http.get(`${API}/wallets`, endpoint('wallets.list', ({ db, request }) => ({
+  route('GET', '/wallets', 'wallets.list', ({ db, request }) => ({
     body: account.listWallets(db, auth.requireUser(db, authHeader(request)).user.id),
-  }))),
-  http.put(`${API}/wallets/:slot`, endpoint('wallets.save', async ({ db, request, params }) => {
+  })),
+  route('PUT', '/wallets/:slot', 'wallets.save', async ({ db, request, params }) => {
     const { user } = auth.requireUser(db, authHeader(request))
     const slot = validate(walletSlot, param(params, 'slot'))
     return { body: account.saveWallet(db, user.id, slot, validate(saveWalletRequest, await readJson(request))) }
-  })),
-  http.delete(`${API}/wallets/:slot`, endpoint('wallets.remove', ({ db, request, params }) => {
+  }),
+  route('DELETE', '/wallets/:slot', 'wallets.remove', ({ db, request, params }) => {
     const { user } = auth.requireUser(db, authHeader(request))
     return { body: account.removeWallet(db, user.id, validate(walletSlot, param(params, 'slot'))) }
-  })),
-  http.post(`${API}/wallets/:id/connect`, endpoint('wallets.connect', ({ db, request, params }) => ({
+  }),
+  route('POST', '/wallets/:id/connect', 'wallets.connect', ({ db, request, params }) => ({
     body: account.connectWallet(db, auth.requireUser(db, authHeader(request)).user.id, param(params, 'id')),
-  }))),
-  http.post(`${API}/wallets/:id/disconnect`, endpoint('wallets.disconnect', ({ db, request, params }) => ({
-    body: account.disconnectWallet(db, auth.requireUser(db, authHeader(request)).user.id, param(params, 'id')),
-  }))),
-
-  // Rota desconhecida da API: 404 no formato do contrato (não deixa a requisição vazar para a rede).
-  http.all(`${API}/*`, endpoint('unknown', () => {
-    throw new MockError('NOT_FOUND', 'Rota da API inexistente.')
   })),
+  route('POST', '/wallets/:id/disconnect', 'wallets.disconnect', ({ db, request, params }) => ({
+    body: account.disconnectWallet(db, auth.requireUser(db, authHeader(request)).user.id, param(params, 'id')),
+  })),
+
 ]
+
+// Rota desconhecida da API: 404 no formato do contrato (não deixa a requisição vazar para a rede).
+const notFound = endpoint('unknown', () => {
+  throw new MockError('NOT_FOUND', 'Rota da API inexistente.')
+})
+
+const API_URL = new URL(API || '/', location.origin)
+const API_PATH = API_URL.pathname.replace(/\/$/, '')
+
+/** Parâmetros da rota (`:nome`, decodificados) quando método e caminho casam; senão `null`. */
+function matchRoute(candidate: Route, method: string, segments: string[]): PathParams | null {
+  if (candidate.method !== method || candidate.segments.length !== segments.length) return null
+  const params: Record<string, string> = {}
+  for (const [index, expected] of candidate.segments.entries()) {
+    const actual = segments[index]!
+    if (expected.startsWith(':')) {
+      try {
+        params[expected.slice(1)] = decodeURIComponent(actual)
+      } catch {
+        return null
+      }
+    } else if (expected !== actual) return null
+  }
+  return params
+}
+
+/**
+ * Handler MSW único para toda a API, com o roteamento feito aqui (a primeira rota que casar
+ * responde, na ordem de `routes`).
+ *
+ * Motivo (perfil da carga inicial): o service worker do MSW repassa à página toda requisição
+ * — inclusive imagens, fontes e chunks — e o `http.*` do MSW lê os cookies (tough-cookie +
+ * tldts) de cada requisição em cada handler testado, antes mesmo de comparar o caminho. Com
+ * ~30 handlers isso eram dezenas de leituras de cookie por requisição na thread principal,
+ * competindo com a renderização. Os resolvers daqui não usam cookies: autenticação é pelo
+ * cabeçalho `Authorization` e o carrinho de visitante pelo `X-Guest-Cart`.
+ */
+class ApiHandler extends RequestHandler<{ header: string }> {
+  constructor() {
+    super({
+      info: { header: `${API}/*` },
+      resolver: ({ request }) => {
+        const segments = new URL(request.url).pathname.slice(API_PATH.length).split('/').filter(Boolean)
+        for (const candidate of routes) {
+          const params = matchRoute(candidate, request.method, segments)
+          if (params) return candidate.handle({ request, params })
+        }
+        return notFound({ request, params: {} })
+      },
+    })
+  }
+
+  predicate({ request }: { request: Request }) {
+    const url = new URL(request.url)
+    return url.origin === API_URL.origin && (url.pathname === API_PATH || url.pathname.startsWith(`${API_PATH}/`))
+  }
+
+  log({ request, response }: { request: Request; response: Response }) {
+    if (import.meta.env.PROD) return
+    console.log(`[MSW] ${request.method} ${new URL(request.url).pathname} (${response.status})`)
+  }
+}
+
+export const handlers = [new ApiHandler()]
