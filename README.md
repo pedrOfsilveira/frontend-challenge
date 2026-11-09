@@ -1,160 +1,184 @@
 # Kurio — NFT Marketplace
 
 Desafio frontend da Jungle Gaming: descoberta, compra e conta de colecionador em
-React/TypeScript, com APIs e pagamentos simulados. O [enunciado original](docs/challenge.md)
-foi preservado. Decisões, contratos e limitações: [ARCHITECTURE.md](ARCHITECTURE.md).
+React/TypeScript, com APIs, autenticação, carteiras e pagamentos simulados por MSW.
+O [enunciado original](docs/challenge.md) foi preservado.
+
+- [ARCHITECTURE.md](ARCHITECTURE.md): contratos, sessão, cache, tempo real, decisões e limitações.
+- [docs/evidencias.md](docs/evidencias.md): matriz requisito → implementação → evidência → status → lacuna.
+- [tests/README.md](tests/README.md): execução dos testes, isolamento, checkout limpo e auditoria.
 
 ## Execução local
 
-Ambiente usado: Node 26.13 e pnpm 12.18 (fixado em `packageManager`).
+Ambiente de referência: Node 26.13 e pnpm 12.18 (fixado em `packageManager`).
 
 ```sh
 pnpm install --frozen-lockfile --ignore-scripts
-pnpm dev
+pnpm dev            # Vite com MSW ativo
 ```
 
-O worker MSW está versionado em `public/mockServiceWorker.js`; não é necessário
-executar scripts de instalação das dependências. Abra a URL indicada pelo Vite.
+O worker do MSW está versionado em `public/mockServiceWorker.js`, então nenhum
+script de instalação das dependências precisa rodar (`pnpm-workspace.yaml` nega
+o build do pacote `msw`). Abra a URL indicada pelo Vite.
 
 ```sh
-pnpm build
-pnpm preview
+pnpm build          # tsr generate + tsc -b + vite build
+pnpm preview        # serve dist/ (também com MSW)
 ```
 
-O build de demonstração também usa MSW. Não há backend privado, extensão de
-carteira ou pagamento real. Sirva em localhost ou HTTPS para usar o service worker.
+O build de demonstração usa os mesmos mocks. Não há backend privado, extensão de
+carteira nem pagamento real. O service worker exige localhost ou HTTPS.
 
-## Configuração
+## Variáveis de ambiente
 
 | Variável | Padrão | Função |
 |---|---|---|
-| `VITE_ENABLE_MOCKS` | `true` em `.env.development` e `.env.production` | Habilita MSW REST e Socket.IO. |
-| `VITE_API_URL` | `/api` | Base dos endpoints Axios e handlers MSW. |
-| `E2E_BASE_URL` | preview local, porta 4173 | Testa um servidor existente. |
-| `E2E_BROWSER_CHANNEL` | Chromium do Playwright | Use `chrome` para Chrome instalado. |
-| `CHROME_PATH` | Chromium instalado ou Chrome Linux | Executável usado pelo Lighthouse. |
-| `LIGHTHOUSE_BASE_URL` | preview local, porta 4175 | Audita servidor existente. |
+| `VITE_ENABLE_MOCKS` | `true` em `.env.development` e `.env.production` | Liga MSW REST e Socket.IO. Somente o valor `true` ativa. |
+| `VITE_API_URL` | `/api` | Base do Axios e dos handlers MSW. |
+| `VITE_REALTIME_URL` | origem da página | Origem do Socket.IO (cliente e `ws.link` do mock). O caminho é sempre `/realtime/`. |
+| `E2E_BASE_URL` | preview local em `127.0.0.1:4173` | Roda os E2E contra um servidor existente, sem build próprio. |
+| `E2E_BROWSER_CHANNEL` | Chromium do Playwright | `chrome` usa o Chrome instalado. |
+| `PLAYWRIGHT_HTML_OUTPUT_DIR` | `playwright-report/` | Pasta do relatório HTML (variável oficial do Playwright). |
+| `LIGHTHOUSE_BASE_URL` | preview local em `127.0.0.1:4175` | Audita um servidor existente, sem build próprio. |
+| `CHROME_PATH` | Chromium do Playwright ou `/opt/google/chrome/chrome` | Navegador usado pelo Lighthouse. |
 
-Variáveis `VITE_*` são públicas e aplicadas no build; não coloque segredos nelas.
+Variáveis `VITE_*` são públicas e entram no bundle; não coloque segredos nelas.
 
-## Credenciais fictícias
+## Credenciais fictícias e dados
 
-| Usuário | E-mail | Senha |
-|---|---|---|
-| Nova Sato | `nova@kurio.dev` | `kurio123` |
-| Leo Martins | `leo@kurio.dev` | `kurio123` |
+| Usuário | E-mail | Senha | Estado inicial |
+|---|---|---|---|
+| Nova Sato | `nova@kurio.dev` | `kurio123` | Carrinho vazio, sem favoritos, carteira principal Ethereum. |
+| Leo Martins | `leo@kurio.dev` | `kurio123` | Golden Beat #207 no carrinho, dois favoritos, principal Polygon e secundária Ethereum. |
 
-Há 48 NFTs, edições com estoques distintos, Ethereum/Polygon/Solana no catálogo,
-dois usuários com favoritos/carrinhos/carteiras diferentes e uma edição esgotada.
-Pagamento suporta Ethereum e Polygon. Leo começa com um NFT no carrinho; Nova
-começa sem itens. Cadastro cria outra conta no mesmo servidor simulado.
+O cadastro cria outras contas no mesmo servidor simulado. Senhas ficam como
+hash PBKDF2-SHA256 com salt; o banco simulado não guarda texto claro.
 
-Cupons: `KURIO10` (10%, subtotal mínimo 1 ETH), `LANCAMENTO` (0,05 ETH) e
-`EXPIRADO25` (expirado). ETH trafega como string; cálculos usam wei com bigint.
+O catálogo tem 48 NFTs em Ethereum, Polygon e Solana, com edições de estoques
+distintos e um NFT totalmente esgotado. O pagamento aceita Ethereum (taxa
+0,016 ETH) e Polygon (0,002 ETH). Cupons: `KURIO10` (10%, subtotal mínimo
+1 ETH), `LANCAMENTO` (0,05 ETH) e `EXPIRADO25` (expirado). A cotação vale 10 min
+e a sessão, 2 h. ETH trafega como string decimal; os cálculos usam wei com `bigint`.
 
 ## Cenários e reset
 
-Abra `/?scenario=slow` para rede lenta. Outras opções: `default`, `fast`, `jitter`,
-`out-of-order`, `offline`, `server-error`, `flaky`, `empty`. A opção persiste;
-volte com `/?scenario=default`.
+Selecione o cenário pela URL. A escolha fica salva no `localStorage` até outra:
 
-Para reset integral com recarga, abra `/?mock-reset`. Restaura banco, cenários,
-falhas e eventos. Tokens antigos deixam de ser válidos; a próxima chamada
-autenticada solicita login. Para uma sessão totalmente nova, use contexto de
-navegador novo, como os E2E fazem.
+| Cenário | Comportamento |
+|---|---|
+| `default` | Latência 120–400 ms (semente fixa). |
+| `fast` | Sem latência. |
+| `slow` | 1,8–2,6 s: mostra os skeletons. |
+| `jitter` | 50 ms–1,5 s. |
+| `out-of-order` | Listagem do catálogo: a 1ª resposta leva 1,5 s, a 2ª 150 ms. |
+| `offline` | Toda requisição falha na rede; o Socket.IO recusa conexões. |
+| `server-error` | Leituras (GET) respondem 503. |
+| `flaky` | Uma em cada duas requisições responde 503. |
+| `empty` | Catálogo vazio. |
 
-Após carregar a página, use `window.__kurioMock` no console para reproduzir casos
-específicos. Os controles alteram o servidor simulado; a UI recebe REST e Socket.IO.
+Exemplo: `/?scenario=slow`. Volte com `/?scenario=default`.
+
+**Reset integral:** abra `/?mock-reset` (ou `/?mock-reset&scenario=slow`). Antes
+de qualquer requisição, ele reconstrói banco, sessões, carrinhos, pedidos e
+cotações. Também restaura o cenário (padrão `default`), latência, falhas
+injetadas, respostas retidas, histórico de eventos e conexões Socket.IO. Os dois
+parâmetros saem da URL. Tokens anteriores deixam de existir no servidor, e a
+próxima chamada autenticada leva ao login. O token e o rascunho guardados no
+navegador não são apagados. Para uma sessão totalmente limpa, use um contexto de
+navegador novo, como fazem os E2E.
+
+## Reproduzir falhas
+
+Depois que a página carregar, `window.__kurioMock` fica disponível no console.
+Os controles só alteram o servidor simulado. A interface recebe as mudanças por
+REST e Socket.IO, nunca por escrita direta no cache.
 
 ```js
-// Adicione Emerald Ape #042 e abra o pagamento/revisão antes de mudar preço/estoque.
+// Preço/estoque durante a compra: adicione Emerald Ape #042, abra a revisão e então:
 await __kurioMock.updateNft('emerald-ape-042', { priceEth: '2.5' })
 await __kurioMock.updateNft('emerald-ape-042', { available: 0 })
 
-// A próxima chamada autenticada exige login, preservando o retorno.
+// Sessão expirada: a próxima chamada autenticada leva ao login, preservando o retorno.
 await __kurioMock.expireSessions()
 
-// Configure antes de enviar: o pedido fica pendente até decisão explícita.
-await __kurioMock.setPaymentOutcome('hold')
-await __kurioMock.settlePendingOrders('confirm') // ou 'decline'
+// Cupom que expira durante a revisão.
+await __kurioMock.expireCoupon('KURIO10')
 
-// Antes de confirmar: grava o pedido, expira a resposta e recupera por idempotência.
+// Pagamento pendente até decisão explícita (configure antes de pagar).
+await __kurioMock.setPaymentOutcome('hold')        // 'confirm' (padrão) | 'decline' | 'hold'
+await __kurioMock.settlePendingOrders('confirm')   // ou 'decline'
+
+// Pedido gravado com a resposta perdida/atrasada: o retry recupera o mesmo pedido.
 __kurioMock.failNext('orders.create', 'timeout-after-commit')
 
-// Queda com pedido pendente: decida no servidor e reconecte.
+// Queda do Socket.IO com pedido pendente: decida no servidor e reconecte.
 __kurioMock.realtime.pause()
 await __kurioMock.settlePendingOrders('confirm')
 __kurioMock.realtime.resume()
 
-// Reenvie eventos duplicados ou antigos.
-const event = __kurioMock.events().find(e => e.type === 'nft.updated')
+// Eventos duplicados ou antigos.
+const event = __kurioMock.events().find((e) => e.type === 'nft.updated')
 if (event) __kurioMock.realtime.replay(event.id)
 
-// Falha no favorito ou recusa de conexão da carteira.
+// Falha no favorito; recusa e queda da conexão da carteira.
 __kurioMock.failNext('favorites.add', 'server-error')
 await __kurioMock.setWalletConnection('reject')
+await __kurioMock.disconnectWallets()
 ```
 
-Falhas por rota: `network`, `timeout`, `server-error`, `after-commit` (resposta
-perdida) e `timeout-after-commit` (resposta atrasada após gravação). `setLatency(ms)`
-e `setPaymentDelay(ms)` controlam o tempo sem mudar regras do domínio.
+`failNext(rota, tipo, n)` aceita `network`, `timeout`, `server-error`,
+`after-commit` (gravou e perdeu a resposta) e `timeout-after-commit` (gravou e
+respondeu depois do timeout de 10 s do Axios). `*` vale para qualquer rota. Os
+nomes de rota estão em `src/mocks/handlers.ts`. Também há `setLatency(ms | null)`,
+`setPaymentDelay(ms)` (padrão 2,5 s), `holdNext(rota)` e `releaseHeld(rota)` para
+reter uma resposta já calculada, além de `realtime.drop()` e `realtime.connections()`.
+`snapshot()` devolve uma cópia do banco simulado.
 
-## Verificações
+## Comandos
 
 ```sh
-pnpm typecheck
+pnpm dev                 # desenvolvimento com mocks
+pnpm build && pnpm preview
+pnpm typecheck           # app, configuração e E2E
 pnpm lint
-pnpm build
-pnpm test
+pnpm test                # Vitest (unitários)
 pnpm exec playwright install chromium
-pnpm test:e2e
-pnpm test:e2e:report
-pnpm audit:lighthouse
+pnpm test:e2e            # build + preview na 4173, Chromium desktop e mobile
+pnpm test:e2e:report     # abre o último relatório HTML
+pnpm audit:lighthouse    # build + preview na 4175, 3 execuções por página/perfil
 ```
 
-[Guia de testes](tests/README.md): isolamento, baselines e uso contra deploy.
-Os E2E cobrem cadastro, sessão, compra, idempotência, eventos, reconexão, conta e
-regressão visual em desktop/mobile. HTML e traces de falha ficam em
-`playwright-report/` e `test-results/`.
+Detalhes, execução isolada em paralelo e checkout limpo: [tests/README.md](tests/README.md).
 
-Lighthouse gera HTML/JSON de início e detalhe, três execuções por perfil e página,
-com medianas em `reports/lighthouse/summary.md`. Não há versão simplificada para
-auditoria. Resultados locais: 35 unitários passaram; a suíte completa de 54 E2E passou e a
-regressão de expiração teve outras seis execuções aprovadas; typecheck, lint e build
-passaram também em cópia limpa. Lighthouse: desempenho desktop 97–98,
-mobile 55–62; acessibilidade 100, boas práticas 96, SEO 92. **Performance mobile
-abaixo da meta de 90**, com causas e próximos passos em ARCHITECTURE.md.
-[Relatórios e medianas](reports/lighthouse/summary.md).
+## Estado da verificação
+
+Pendente de validação final. <!-- FINAL: resumo dos resultados do gate final (commit, typecheck/lint/build, unitários, E2E, Lighthouse) -->
+Os números finais de testes e auditoria só serão registrados depois que o
+código for congelado. A matriz em [docs/evidencias.md](docs/evidencias.md)
+indica o que cada requisito tem como evidência e o que ainda falta.
+
+Os relatórios em `reports/lighthouse/` são **anteriores** às mudanças desta
+integração e não medem a versão final. Neles, a performance mobile ficou abaixo
+da meta de 90 (início 55, detalhe 62); desktop 97–98; acessibilidade 100, boas
+práticas 96, SEO 92. A auditoria do build final está pendente de validação final.
+<!-- FINAL: medianas da auditoria final e metas não atingidas -->
 
 ## Publicação
 
-Repositório: https://github.com/pedrOfsilveira/frontend-challenge
+`vercel.json` configura Vite, instalação sem scripts, SPA fallback (exceto
+`assets/`, `api/`, `realtime/` e o worker) e `no-cache` no worker. O build
+publicado usa `.env.production`, com mocks ativos.
 
-`vercel.json` configura Vite, instalação sem scripts, SPA fallback e headers do
-worker. O deploy inclui `.env.production` com mocks ativos. Acesso direto e
-refresh de detalhe, pagamento, perfil, carteiras e pedido devem funcionar na URL pública.
+- Repositório: https://github.com/pedrOfsilveira/frontend-challenge. Revisão entregue pendente de validação final. <!-- FINAL: branch e SHA enviados -->
+- Aplicação: pendente de validação final. <!-- FINAL: URL pública e deployment ID -->
 
-Site publicado: **https://racing-sable-eislhs3.vercel.app**
+A correspondência entre o código do repositório e a versão publicada ainda não
+foi verificada para esta revisão. <!-- FINAL: confirmar paridade repositório/deploy -->
 
-O projeto `racing-sable-eislhs3` pertence à conta Vercel do candidato. Esse
-domínio está adicionado ao projeto e acompanha as publicações de produção.
-Acesso direto às rotas SPA e entrega do service worker com MIME JavaScript e
-`no-cache, no-store, must-revalidate` foram confirmados.
-
-O antigo endereço `.tmp.now` permanece na versão anterior e não deve ser usado
-para avaliação: a conta transferida não permite atualizar esse domínio.
-O endereço público acima já inclui a correção que preserva o aviso de expiração
-quando um refresh interrompe o redirecionamento para login.
-
-Publicação foi feita pela CLI autenticada, sem push para o GitHub. Para publicar
-outra alteração no mesmo projeto:
+Para publicar no projeto Vercel existente (CLI autenticada na conta proprietária):
 
 ```sh
 vercel deploy --project racing-sable-eislhs3 --scope pedrofsilveiras-projects
 # Após validar o preview:
 vercel promote <deployment-url> --scope pedrofsilveiras-projects
 ```
-
-Validação final do domínio público: **36 E2E aprovados** em desktop/mobile,
-incluindo compra, conta, expiração após refresh, isolamento e reconexão. Deploy:
-`dpl_DibzKLXiS6CDCc82fNe9519QizZc` (correção `96d9d39`).
