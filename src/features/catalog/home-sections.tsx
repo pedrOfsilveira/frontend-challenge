@@ -65,29 +65,30 @@ export function HomeHero() {
 /** Banner do Figma mobile (366 × 190). */
 export function MobileHero() {
   return (
-    <section aria-labelledby="mobile-hero-title" className="relative min-h-[190px] overflow-hidden rounded-xl px-4 py-1.5 lg:hidden">
+    <section aria-labelledby="mobile-hero-title" className="@container relative aspect-[366/190] overflow-hidden rounded-xl lg:hidden">
       <img src={mobileHeroBg} alt="" aria-hidden className="absolute inset-0 size-full max-w-none" />
-      <div className="relative flex flex-col items-center gap-4">
-        <div className="flex w-full items-center gap-2">
+      {/* As medidas internas acompanham os 366 px do banner no Figma. */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-[4.3716cqw] px-[4.3716cqw]">
+        <div className="flex w-full items-center gap-[2.1858cqw]">
           <div className="flex min-w-0 flex-1 flex-col">
-            <div className="flex flex-col gap-1.5">
-              <p className="text-xs leading-4 font-medium text-cream">Bem-vindo à Kurio</p>
-              <h1 id="mobile-hero-title" className="w-full max-w-[190px] text-lg leading-[29px] font-bold text-cream">
-                SEJA DONO DA CULTURA DIGITAL
+            <div className="flex flex-col gap-[1.6393cqw]">
+              <p className="text-[3.2787cqw] leading-[4.3716cqw] font-medium text-cream">Bem-vindo à Kurio</p>
+              <h1 id="mobile-hero-title" className="text-[4.918cqw] leading-[7.9235cqw] font-bold text-cream">
+                SEJA DONO DA<br />CULTURA DIGITAL
               </h1>
-              <p className="text-xs leading-[18px] text-sand-light">Descubra NFTs selecionados de criadores do mundo todo.</p>
+              <p className="text-[3.2787cqw] leading-[4.918cqw] text-sand-light">Descubra NFTs selecionados de criadores do mundo todo.</p>
             </div>
-            <Link to="/" hash="catalogo" className={`flex items-center gap-2 self-start rounded-sm text-xs leading-[14px] font-bold text-copper-light ${focusRing}`}>
+            <Link to="/" hash="catalogo" className={`flex items-center gap-[2.1858cqw] self-start rounded-sm text-[3.2787cqw] leading-[3.8251cqw] font-bold text-copper-light ${focusRing}`}>
               EXPLORAR
-              <img src={mobileArrow} alt="" width={10} height={12} className="-rotate-90" />
+              <img src={mobileArrow} alt="" width={10} height={12} className="h-[3.2787cqw] w-[2.7322cqw] -rotate-90" />
             </Link>
           </div>
-          <div className="relative size-[clamp(88px,33.333vw,138px)] shrink-0">
+          <div className="relative size-[37.7049cqw] shrink-0">
             <NftImage src={ART.shades} alt="" sizes="138px" priority className="size-full rounded-2xl object-cover" />
-            <NftImage src={ART.bucket} alt="" sizes="58px" priority className="absolute top-[64%] left-[10%] size-[42%] rounded-2xl object-cover" />
+            <NftImage src={ART.bucket} alt="" sizes="58px" priority className="absolute top-[24.0437cqw] left-[3.8251cqw] size-[15.847cqw] rounded-2xl object-cover" />
           </div>
         </div>
-        <img src={mobileDots} alt="" aria-hidden width={33} height={7} />
+        <img src={mobileDots} alt="" aria-hidden width={33} height={7} className="h-[1.9126cqw] w-[9.0164cqw]" />
       </div>
     </section>
   )

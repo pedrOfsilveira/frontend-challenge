@@ -6,7 +6,7 @@ import { SORT_LABELS, TAB_LABELS } from './search'
 
 export function CatalogTabs({ value, onChange, className }: { value: CatalogTab; onChange: (tab: CatalogTab) => void; className?: string }) {
   return (
-    <div role="group" aria-label="Seleção do catálogo" className={cn('flex min-w-0 flex-wrap items-start gap-4 lg:gap-5', className)}>
+    <div role="group" aria-label="Seleção do catálogo" className={cn('flex min-w-0 flex-nowrap items-start gap-1 lg:gap-5', className)}>
       {catalogTabIds.map((tab) => {
         const active = tab === value
         return (
@@ -16,7 +16,8 @@ export function CatalogTabs({ value, onChange, className }: { value: CatalogTab;
             aria-pressed={active}
             onClick={() => onChange(tab)}
             className={cn(
-              'flex flex-col gap-1 text-sm leading-4 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-light lg:gap-[7px] lg:text-[15px] lg:font-medium',
+              'flex shrink-0 flex-col gap-0.5 text-[clamp(10px,calc(3.8251vw_-_1.8361px),14px)] leading-4 whitespace-nowrap focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-light lg:gap-[7px] lg:text-[15px] lg:font-medium',
+              tab === 'trending' && 'ml-3 lg:ml-0',
               active ? 'font-bold text-copper-light' : 'text-cream',
             )}
           >

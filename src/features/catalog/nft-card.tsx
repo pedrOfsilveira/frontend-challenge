@@ -13,16 +13,17 @@ const BADGE_LABELS = { rare: 'RARO', limited: 'OFERTA LIMITADA', featured: 'DEST
  * Mobile: caixa arredondada com gradiente, arte de 168 px, selo e favorito.
  * O card inteiro é clicável por um link esticado; o favorito fica por cima, fora do `<a>`.
  */
-export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?: boolean }) {
+export function NftCard({ nft, priority = false, mobileColumn = 'left' }: { nft: NftSummary; priority?: boolean; mobileColumn?: 'left' | 'right' }) {
   const badge = nft.badges.includes('rare') ? 'rare' : null
   const soldOut = nft.available === 0
 
   return (
-    <article className="group relative flex flex-col gap-2 lg:gap-3">
+    <article className="@container group relative flex flex-col gap-2 lg:gap-3">
       <div
         className={cn(
-          'relative flex aspect-[175/200] items-center justify-center overflow-hidden rounded-[20px] bg-linear-[139.5deg] from-surface-card from-12% to-surface-raised px-1',
-          'lg:aspect-[258/300] lg:rounded-none lg:bg-none lg:bg-surface-card',
+          'relative flex aspect-[175/200] items-start justify-center overflow-hidden rounded-[20px] bg-linear-[139.5deg] from-surface-card from-12% to-surface-raised px-1',
+          mobileColumn === 'left' ? 'pt-[6.857%]' : 'pt-[11.4286%]',
+          'lg:aspect-[258/300] lg:items-center lg:rounded-none lg:bg-none lg:bg-surface-card lg:pt-0',
         )}
       >
         <NftImage
@@ -30,7 +31,7 @@ export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?:
           alt=""
           sizes="(min-width: 1024px) 250px, (min-width: 768px) 30vw, 45vw"
           priority={priority}
-          className="aspect-square w-full rounded-2xl object-cover transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transition-none lg:w-[96.9%] lg:rounded-[15px]"
+          className="aspect-square w-[calc(100%+1px)] max-w-none shrink-0 rounded-2xl object-cover transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transition-none lg:w-[96.9%] lg:rounded-[15px]"
         />
         {badge && (
           <span className="absolute top-4 left-0 flex h-8 items-center bg-copper px-2 text-[13px] leading-4 font-medium text-ink lg:hidden">
@@ -40,7 +41,7 @@ export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?:
       </div>
 
       <div className="flex flex-col pl-2 lg:gap-3 lg:pl-0">
-        <h3 className="text-[15px] text-cream lg:text-base lg:leading-4">
+        <h3 className="text-[8.5714cqw] text-cream lg:text-base lg:leading-4">
           <Link
             to="/nft/$nftId"
             params={{ nftId: nft.id }}
@@ -49,7 +50,7 @@ export function NftCard({ nft, priority = false }: { nft: NftSummary; priority?:
             {nft.name}
           </Link>
         </h3>
-        <p className="flex flex-wrap items-center gap-x-3 text-base leading-4 lg:text-lg">
+        <p className="flex flex-wrap items-center gap-x-3 text-[9.1429cqw] leading-[9.1429cqw] lg:text-lg lg:leading-4">
           <span className="font-bold text-copper-light">
             <span className="sr-only">Preço: </span>
             {formatEth(nft.priceEth)}

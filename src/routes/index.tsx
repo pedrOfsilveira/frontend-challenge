@@ -63,7 +63,7 @@ function HomePage() {
           </aside>
 
           <div className="flex min-w-0 flex-col items-end gap-10 lg:gap-[88px]">
-            <div className="flex w-full flex-col gap-5 lg:gap-8">
+            <div className="flex w-full flex-col gap-4 lg:gap-8">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <CatalogTabs value={params.tab ?? 'all'} onChange={(tab) => void update({ tab: tab === 'all' ? undefined : tab })} />
                 <div className="hidden lg:block">
@@ -113,7 +113,7 @@ function HomePage() {
                   {data
                     ? data.items.map((nft, index) => (
                         <li key={nft.id}>
-                          <NftCard nft={nft} priority={index < 2} />
+                          <NftCard nft={nft} priority={index < 2} mobileColumn={index % 2 === 0 ? 'left' : 'right'} />
                         </li>
                       ))
                     : Array.from({ length: CATALOG_PAGE_SIZE }, (_, index) => (

@@ -16,6 +16,18 @@ test('catálogo, promoções e detalhe cabem entre 320 e 1440 px', async ({ page
   for (const width of widths) {
     await page.setViewportSize({ width, height: 896 })
     await expectPageFits(page)
+    if (width <= 414) {
+      const hero = page.getByRole('region', { name: 'SEJA DONO DA CULTURA DIGITAL' })
+      const banner = (await hero.boundingBox())!
+      expect(banner.height / banner.width).toBeCloseTo(190 / 366, 2)
+      const tabs = page.getByRole('group', { name: 'Seleção do catálogo' })
+      const buttons = await tabs.getByRole('button').all()
+      const boxes = await Promise.all(buttons.map((button) => button.boundingBox()))
+      for (const box of boxes) {
+        expect(box!.y).toBeCloseTo(boxes[0]!.y, 0)
+        expect(box!.x + box!.width).toBeLessThanOrEqual(width - 24 + 1)
+      }
+    }
     const promos = page.getByRole('region', { name: 'Destaques do mercado' })
     await promos.scrollIntoViewIfNeeded()
     const content = await promos.locator('article').evaluateAll((cards) => cards.flatMap((card) => {
