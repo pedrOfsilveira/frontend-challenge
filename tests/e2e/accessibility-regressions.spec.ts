@@ -141,7 +141,7 @@ test('login prende o foco, associa erros e Esc fecha', async ({ page }) => {
 })
 
 test('senha errada anuncia o erro e devolve o foco ao formulário (W2B-R6)', async ({ page }) => {
-  test.fail(true, 'W2B-R6: auth-form.tsx desabilita o fieldset durante o envio e não devolve o foco no erro.')
+  test.fail(true, 'W2B-R6: auth-form.tsx desabilita o fieldset no envio; foco no erro via rAF foi instável no mobile (revertido).')
   await reset(page)
   await page.goto('/entrar')
   await ready(page)
@@ -175,7 +175,6 @@ test('pagamento: erro de campo recebe foco e descrição; revisão prende o foco
 })
 
 test('fechar a revisão devolve o foco a "Confirmar compra" (W2B-R1)', async ({ page }) => {
-  test.fail(true, 'W2B-R1: pagamento.tsx desmonta o ReviewDialog ao fechar; o Radix não consegue restaurar o foco.')
   await reset(page)
   await addEmerald(page)
   await page.getByRole('link', { name: 'Conectar e finalizar' }).click()
@@ -192,7 +191,7 @@ test('fechar a revisão devolve o foco a "Confirmar compra" (W2B-R1)', async ({ 
 })
 
 test('"Confirmar compra" desabilitado explica que a cotação da nova rede está chegando (C-1, W2B-R3)', async ({ page, isMobile }) => {
-  test.fail(true, 'W2B-R3: o botão fica disabled sem aria-describedby nem anúncio do motivo.')
+  test.fail(true, 'W2B-R3: o botão fica disabled sem aria-describedby nem anúncio do motivo (diff aplicado não passou na 1ª tentativa; revertido).')
   const network = await leoCheckout(page, isMobile)
   // Condição do servidor: segura a próxima cotação para a troca de rede ficar observável.
   await page.evaluate(() => window.__kurioMock!.holdNext('cart.quote'))
@@ -207,7 +206,6 @@ test('"Confirmar compra" desabilitado explica que a cotação da nova rede está
 
 test('total do pagamento mobile é anunciado quando a cotação muda (W2B-R4)', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'No desktop o resumo (QuoteTotals) já tem a região aria-live.')
-  test.fail(true, 'W2B-R4: a região aria-live do total está só no <aside> desktop (display:none no mobile).')
   const network = await leoCheckout(page, isMobile)
   await network.selectOption('polygon')
   const live = page.locator('[aria-live="polite"]', { hasText: 'Total atualizado: 0.992 ETH' })
@@ -216,7 +214,7 @@ test('total do pagamento mobile é anunciado quando a cotação muda (W2B-R4)', 
 
 test('títulos do carrinho não cortam descendentes (W2B-R5)', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'Só o cartão mobile (15 px em linha de 16 px) corta; a tabela desktop cabe.')
-  test.fail(true, 'W2B-R5: cart-lines.tsx usa truncate com line-height 16 px em fonte de 15–16 px; o "p" de "Ape" é cortado.')
+  test.fail(true, 'W2B-R5: cart-lines.tsx usa truncate com line-height 16 px; corrigir muda o baseline carrinho mobile (revisão do coordenador).')
   await reset(page)
   await addEmerald(page)
   const title = page.getByRole('link', { name: 'Emerald Ape #042', exact: true }).filter({ visible: true })
