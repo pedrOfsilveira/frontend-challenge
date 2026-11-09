@@ -29,6 +29,13 @@ locale/timezone são fixos, movimento é reduzido e fontes/imagens visíveis
 terminam de carregar antes da captura. Report HTML e traces de falha são gerados
 em `playwright-report/` e `test-results/` (não versionados).
 
+`responsive.spec.ts` verifica 320/390/414/768/1024/1440 px nos dois perfis de
+navegador. Confere a largura real do documento contra o viewport solicitado,
+conteúdo e botões inteiros nas promoções, altura do hero em 414 px, revisão de
+compra sem overflow interno (inclusive o botão de fechar) e rótulos longos de
+carteiras. Capturas das promoções e da revisão ficam nos artefatos de cada teste;
+esses checks complementam as baselines do primeiro viewport.
+
 A análise axe verifica regras WCAG automatizáveis; não substitui teste manual
 de leitor de tela, teclado, zoom e comparação com o Figma.
 

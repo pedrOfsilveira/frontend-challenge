@@ -65,14 +65,14 @@ export function HomeHero() {
 /** Banner do Figma mobile (366 × 190). */
 export function MobileHero() {
   return (
-    <section aria-labelledby="mobile-hero-title" className="relative overflow-hidden rounded-xl p-4 lg:hidden">
+    <section aria-labelledby="mobile-hero-title" className="relative min-h-[190px] overflow-hidden rounded-xl px-4 py-1.5 lg:hidden">
       <img src={mobileHeroBg} alt="" aria-hidden className="absolute inset-0 size-full max-w-none" />
       <div className="relative flex flex-col items-center gap-4">
         <div className="flex w-full items-center gap-2">
           <div className="flex min-w-0 flex-1 flex-col">
             <div className="flex flex-col gap-1.5">
               <p className="text-xs leading-4 font-medium text-cream">Bem-vindo à Kurio</p>
-              <h1 id="mobile-hero-title" className="w-[190px] text-lg leading-[29px] font-bold text-cream">
+              <h1 id="mobile-hero-title" className="w-full max-w-[190px] text-lg leading-[29px] font-bold text-cream">
                 SEJA DONO DA CULTURA DIGITAL
               </h1>
               <p className="text-xs leading-[18px] text-sand-light">Descubra NFTs selecionados de criadores do mundo todo.</p>
@@ -82,9 +82,9 @@ export function MobileHero() {
               <img src={mobileArrow} alt="" width={10} height={12} className="-rotate-90" />
             </Link>
           </div>
-          <div className="relative size-[138px] shrink-0">
-            <NftImage src={ART.shades} alt="" sizes="138px" priority className="size-[138px] rounded-2xl object-cover" />
-            <NftImage src={ART.bucket} alt="" sizes="58px" priority className="absolute top-[88px] left-[14px] size-[58px] rounded-2xl object-cover" />
+          <div className="relative size-[clamp(88px,33.333vw,138px)] shrink-0">
+            <NftImage src={ART.shades} alt="" sizes="138px" priority className="size-full rounded-2xl object-cover" />
+            <NftImage src={ART.bucket} alt="" sizes="58px" priority className="absolute top-[64%] left-[10%] size-[42%] rounded-2xl object-cover" />
           </div>
         </div>
         <img src={mobileDots} alt="" aria-hidden width={33} height={7} />
@@ -191,20 +191,22 @@ export function Promos() {
   return (
     <section aria-label="Destaques do mercado" className="grid gap-7 lg:grid-cols-2">
       {PROMOS.map((promo) => (
-        <article key={promo.title[0]} className="relative grid h-[250px] grid-cols-[49.8%_1fr] overflow-hidden rounded-lg bg-surface-card">
-          <img src={promo.art} alt="" width={292} height={250} loading="lazy" decoding="async" className="h-[250px] w-full rounded-[18px] object-cover" />
-          <div className="relative z-10 flex flex-col items-end gap-[9px] pt-[37px] pr-[30px] pb-[46px] text-right">
+        <article key={promo.title[0]} className="relative grid min-w-0 overflow-hidden rounded-lg bg-surface-card sm:min-h-[250px] sm:grid-cols-[49.8%_minmax(0,1fr)]">
+          <div className="relative h-[220px] sm:h-auto sm:min-h-[250px]">
+            <img src={promo.art} alt="" width={292} height={250} loading="lazy" decoding="async" className="absolute inset-0 size-full rounded-[18px] object-cover" />
+          </div>
+          <div className="relative z-10 flex min-w-0 flex-col items-start gap-3 p-6 text-left sm:items-end sm:gap-[9px] sm:pr-[30px] sm:pl-0 sm:text-right">
             <h2 className="text-lg leading-6 font-bold text-cream">
               {promo.title[0]}
               <br />
               {promo.title[1]}
             </h2>
-            <p className="line-clamp-3 max-w-[263px] text-sm leading-6 text-sand-light">{promo.text}</p>
+            <p className="max-w-[263px] text-sm leading-6 text-sand-light">{promo.text}</p>
             <Link
               to="/"
               search={promo.search}
               hash="catalogo"
-              className={`mt-auto flex h-10 w-[140px] items-center justify-center gap-0 rounded-md bg-copper text-sm leading-5 font-medium text-ink hover:bg-copper-light ${focusRing}`}
+              className={`mt-auto flex min-h-10 w-[140px] max-w-full shrink-0 items-center justify-center gap-0 rounded-md bg-copper text-sm leading-5 font-medium text-ink hover:bg-copper-light ${focusRing}`}
             >
               Explorar
               <img src={arrowRight} alt="" width={18} height={18} className="size-[18px] -rotate-90 p-[3.5px_4.5px]" />
@@ -234,7 +236,7 @@ export function Blog() {
         </h2>
         <p className="text-sm text-sand-light">Histórias, guias e insights para colecionadores sobre o universo da propriedade digital.</p>
       </div>
-      <div className="grid w-full gap-6 sm:grid-cols-2 lg:grid-cols-[repeat(4,268px)]">
+      <div className="grid w-full gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[repeat(4,268px)]">
         {POSTS.map((post) => (
           <article key={post.title} className="flex flex-col overflow-hidden rounded-lg bg-surface-card">
             <img src={post.art.replace('.webp', '-640.webp')} alt="" width={268} height={195} loading="lazy" decoding="async" className="h-[195px] w-full object-cover" />
@@ -242,9 +244,6 @@ export function Blog() {
               <p className="text-xs leading-4 font-medium whitespace-pre-wrap text-sand-light">{`${post.date}  |  Leitura de ${post.read}`}</p>
               <h3 className="text-base font-bold text-cream-light">{post.title}</h3>
               <p className="text-xs leading-4 font-medium text-sand-light">{post.text}</p>
-              <p className="text-xs text-copper-light" aria-hidden>
-                <span className="leading-[14px] font-bold">Ler mais</span> →
-              </p>
             </div>
           </article>
         ))}

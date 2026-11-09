@@ -30,10 +30,10 @@ interface FieldShell {
 function Label({ id, label, srLabel, required }: Pick<FieldShell, 'id' | 'label' | 'srLabel' | 'required'>) {
   if (!label) return <label htmlFor={id} className="sr-only">{srLabel}</label>
   return (
-    <label htmlFor={id} className="flex items-center gap-1 text-[15px] leading-[15px] whitespace-nowrap text-cream">
-      {label}
+    <label htmlFor={id} className="flex min-w-0 items-start gap-1 text-[15px] leading-5 text-cream">
+      <span className="min-w-0">{label}</span>
       {required && (
-        <span aria-hidden className="text-[22px] leading-[29px] text-[#f0805f]">
+        <span aria-hidden className="shrink-0 text-[22px] leading-5 text-[#f0805f]">
           *
         </span>
       )}
@@ -61,7 +61,7 @@ export function TextField({
   ...input
 }: FieldShell & Omit<React.ComponentProps<'input'>, 'id' | 'onChange' | 'value'> & { value: string; onChange: (value: string) => void }) {
   return (
-    <div className={cn('flex flex-col justify-end', !label && 'pt-[29px]', className)}>
+    <div className={cn('flex min-w-0 flex-col justify-end', !label && 'pt-[29px]', className)}>
       <Label id={id} label={label} srLabel={srLabel} required={required} />
       <input
         id={id}
@@ -89,7 +89,7 @@ export function SelectField<T extends string>({
   onChange,
 }: FieldShell & { value: T; options: { value: T; label: string }[]; onChange: (value: T) => void }) {
   return (
-    <div className={cn('flex flex-col', className)}>
+    <div className={cn('flex min-w-0 flex-col', className)}>
       <Label id={id} label={label} required={required} />
       <div className="relative">
         <select

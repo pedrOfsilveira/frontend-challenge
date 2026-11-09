@@ -6,7 +6,7 @@ import { SORT_LABELS, TAB_LABELS } from './search'
 
 export function CatalogTabs({ value, onChange, className }: { value: CatalogTab; onChange: (tab: CatalogTab) => void; className?: string }) {
   return (
-    <div role="group" aria-label="Seleção do catálogo" className={cn('flex items-start gap-4 lg:gap-5', className)}>
+    <div role="group" aria-label="Seleção do catálogo" className={cn('flex min-w-0 flex-wrap items-start gap-4 lg:gap-5', className)}>
       {catalogTabIds.map((tab) => {
         const active = tab === value
         return (

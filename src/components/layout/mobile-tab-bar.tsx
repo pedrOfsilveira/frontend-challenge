@@ -42,10 +42,10 @@ export function MobileTabBar({ active }: { active: TabBarSection }) {
       <Link to="/" aria-label="Início" aria-current={active === 'home' ? 'page' : undefined} className={cn(item, 'left-[11.1%]', tone('home'))}>
         <MaskIcon src={home} width={16} height={17} />
       </Link>
-      {/* Favoritos não têm página própria no escopo: só o ícone, sem ação. */}
-      <span aria-hidden className={cn(item, 'left-[28.5%] text-sand-light')}>
-        <MaskIcon src={heart} width={20} height={18} />
-      </span>
+      <button type="button" disabled aria-label="Favoritos indisponíveis nesta demonstração" className={cn(item, 'left-[28.5%] cursor-default text-sand-light')}>
+        <MaskIcon src={heart} width={20} height={18} className="opacity-40" />
+        <span className="absolute top-full text-[9px] leading-3 whitespace-nowrap">Indisponível</span>
+      </button>
 
       <Link to="/" hash="catalogo" aria-label="Explorar catálogo" className="absolute top-0 left-1/2 size-[65px] -translate-x-1/2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-light">
         <img src={fab} alt="" width={65} height={65} className="absolute inset-0" />

@@ -216,8 +216,8 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
           <MobileGallery images={nft.images} name={nft.name} />
         </div>
         <div className="-mt-[114px] flex flex-col gap-3 rounded-t-[31px] bg-surface-card px-6 pt-8 pb-6">
-          <div className="flex items-center justify-between gap-3">
-            <h1 className="text-xl leading-4 font-bold text-cream">{nft.name}</h1>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="min-w-0 text-xl leading-6 font-bold text-cream">{nft.name}</h1>
             <p className="flex h-[27px] shrink-0 items-center gap-1 rounded-[32px] border border-copper px-1.5 text-sm leading-4">
               <MaskIcon src={starIcon} width={11.7} height={11.1} className="text-[#e3a44e]" />
               <span className="sr-only">Nota </span>

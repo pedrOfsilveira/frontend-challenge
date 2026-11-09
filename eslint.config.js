@@ -5,7 +5,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['dist', '.vercel', 'src/routeTree.gen.ts', 'public/mockServiceWorker.js', '.playwright-mcp'] },
+  { ignores: ['dist', '.vercel', 'src/routeTree.gen.ts', 'public/mockServiceWorker.js', '.playwright-mcp', 'test-results', 'playwright-report'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],

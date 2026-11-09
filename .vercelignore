@@ -1,5 +1,6 @@
 .git
 .playwright-mcp
+.impeccable
 NOTES
 node_modules
 dist

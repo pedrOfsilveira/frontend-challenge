@@ -52,7 +52,7 @@ function HomePage() {
         <MobileHero />
         <HomeHero />
 
-        <section id="catalogo" aria-labelledby="catalog-title" className="scroll-mt-6 lg:grid lg:grid-cols-[310px_1fr] lg:gap-12">
+        <section id="catalogo" aria-labelledby="catalog-title" className="scroll-mt-6 lg:grid lg:grid-cols-[310px_minmax(0,1fr)] lg:gap-12">
           <h2 id="catalog-title" className="sr-only">
             Catálogo de NFTs
           </h2>
@@ -62,9 +62,9 @@ function HomePage() {
             <FeaturedBanner />
           </aside>
 
-          <div className="flex flex-col items-end gap-10 lg:gap-[88px]">
+          <div className="flex min-w-0 flex-col items-end gap-10 lg:gap-[88px]">
             <div className="flex w-full flex-col gap-5 lg:gap-8">
-              <div className="flex items-center justify-between gap-4 overflow-x-auto">
+              <div className="flex flex-wrap items-center justify-between gap-4">
                 <CatalogTabs value={params.tab ?? 'all'} onChange={(tab) => void update({ tab: tab === 'all' ? undefined : tab })} />
                 <div className="hidden lg:block">
                   <CatalogSort value={params.sort ?? 'recent'} onChange={(sort) => void update({ sort: sort === 'recent' ? undefined : sort })} />
@@ -104,7 +104,7 @@ function HomePage() {
                 <ul
                   aria-busy={list.isFetching}
                   className={cn(
-                    'grid grid-cols-2 gap-x-4 gap-y-6 pb-8 md:grid-cols-3 md:pb-0 lg:gap-x-[34px] lg:gap-y-[72px]',
+                    'grid w-full grid-cols-2 gap-x-4 gap-y-6 pb-8 md:grid-cols-3 md:pb-0 lg:gap-x-[34px] lg:gap-y-[72px]',
                     // Coluna da direita deslocada, como no Figma mobile.
                     'max-md:[&>li:nth-child(even)]:translate-y-8',
                     list.isPlaceholderData && 'opacity-60 transition-opacity motion-reduce:transition-none',

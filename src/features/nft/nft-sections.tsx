@@ -28,7 +28,7 @@ export function ShareLinks({ name }: { name: string }) {
     { href: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, icon: twitter, w: 16, h: 12.2, label: 'Twitter' },
   ]
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <span className="text-[15px] leading-4 font-bold text-cream">Compartilhar este NFT:</span>
       {links.map((link) => (
         <a
@@ -53,7 +53,7 @@ const tabTrigger =
 export function NftDetailsTabs({ nft }: { nft: NftDetail }) {
   return (
     <Tabs defaultValue="details" className="gap-3">
-      <TabsList variant="line" className="h-auto w-full justify-start gap-6 rounded-none sm:gap-8 border-b border-copper/35 bg-transparent p-0">
+      <TabsList variant="line" className="h-auto w-full flex-wrap justify-start gap-x-6 gap-y-3 rounded-none sm:gap-x-8 border-b border-copper/35 bg-transparent p-0">
         <TabsTrigger value="details" className={tabTrigger}>
           Detalhes do NFT
         </TabsTrigger>

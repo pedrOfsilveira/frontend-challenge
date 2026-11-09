@@ -40,21 +40,21 @@ export function ReviewDialog(props: ReviewDialogProps) {
     <Dialog open={props.open} onOpenChange={(open) => !props.submitting && props.onOpenChange(open)}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[calc(100dvh-2rem)] gap-0 overflow-y-auto rounded-[14px] border-border bg-surface-card p-0 text-cream sm:max-w-[578px]"
+        className="max-h-[calc(100dvh-2rem)] grid-cols-[minmax(0,1fr)] gap-0 overflow-y-auto rounded-[14px] border-border bg-surface-card p-0 text-cream sm:max-w-[578px]"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-copper/35 px-6 pt-6 pb-4 sm:px-9">
-          <div className="flex flex-col gap-2">
+        <div className="flex min-w-0 items-start justify-between gap-2 border-b border-copper/35 px-6 pt-6 pb-4 sm:px-9">
+          <div className="flex min-w-0 flex-col gap-2">
             <DialogTitle className="text-lg leading-6 font-bold text-cream">Revise sua compra</DialogTitle>
             <DialogDescription className="text-sm text-sand-light">
               Confira os valores e a carteira. Nada é cobrado antes de você confirmar.
             </DialogDescription>
           </div>
-          <DialogClose aria-label="Fechar revisão" disabled={props.submitting} className={cn('rounded-sm p-1 text-sand-light hover:text-cream', focusRing)}>
+          <DialogClose aria-label="Fechar revisão" disabled={props.submitting} className={cn('grid size-10 shrink-0 place-items-center rounded-sm text-sand-light hover:text-cream', focusRing)}>
             <XIcon className="size-[18px]" />
           </DialogClose>
         </div>
 
-        <div className="flex flex-col gap-5 px-6 py-5 sm:px-9">
+        <div className="flex min-w-0 flex-col gap-5 px-6 py-5 wrap-anywhere sm:px-9">
           {props.changed && (
             <div role="alert" className="flex flex-col items-start gap-2 rounded-md border border-copper bg-surface-dark p-3 text-sm">
               <p className="text-cream">
@@ -74,16 +74,18 @@ export function ReviewDialog(props: ReviewDialogProps) {
             {quote ? (
               <ul aria-busy={props.refreshing} className="flex flex-col gap-2">
                 {quote.lines.map((line) => (
-                  <li key={`${line.nftId}:${line.editionId}`} className="flex items-center gap-3 bg-ink/40 pr-3">
-                    <NftImage src={line.image} alt="" sizes="48px" className="size-12 shrink-0 rounded-md object-cover" />
+                  <li key={`${line.nftId}:${line.editionId}`} className="grid grid-cols-[48px_minmax(0,1fr)] items-center gap-x-3 gap-y-2 bg-ink/40 py-2 pr-3 sm:flex sm:gap-3 sm:py-0">
+                    <NftImage src={line.image} alt="" sizes="48px" className="row-span-2 size-12 shrink-0 self-start rounded-md object-cover sm:self-auto" />
                     <span className="flex min-w-0 flex-1 flex-col gap-1 leading-4">
-                      <span className="truncate text-sm font-bold">{line.name}</span>
+                      <span className="text-sm font-bold">{line.name}</span>
                       <span className="text-xs text-sand">
                         Edição {line.editionLabel} · {formatEth(line.unitPriceEth)} cada
                       </span>
                     </span>
-                    <span className="text-sm whitespace-nowrap text-sand-light">(x {line.quantity})</span>
-                    <span className="text-sm font-bold whitespace-nowrap text-copper-light">{formatEth(line.lineTotalEth)}</span>
+                    <span className="col-start-2 flex min-w-0 flex-wrap justify-between gap-x-3 gap-y-1 sm:contents">
+                      <span className="text-sm text-sand-light">(x {line.quantity})</span>
+                      <span className="text-sm font-bold text-copper-light">{formatEth(line.lineTotalEth)}</span>
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -97,7 +99,7 @@ export function ReviewDialog(props: ReviewDialogProps) {
               <Row label="Subtotal" value={formatEth(quote.subtotalEth)} />
               <Row label={quote.coupon?.label ?? 'Desconto'} value={`(-) ${formatEth(quote.discountEth)}`} />
               <Row label={`Taxa de rede (${NETWORK_LABELS[quote.network]})`} value={formatEth(quote.networkFeeEth)} />
-              <div className="flex justify-between gap-3 pt-1 text-base font-bold">
+              <div className="flex flex-wrap justify-between gap-3 pt-1 text-base font-bold">
                 <dt>Total</dt>
                 <dd className="text-lg leading-5 text-copper-light">{formatEth(quote.totalEth)}</dd>
               </div>
@@ -109,7 +111,7 @@ export function ReviewDialog(props: ReviewDialogProps) {
               Carteira
             </h3>
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-border p-3">
-              <p className="text-sm leading-5">
+              <p className="min-w-0 text-sm leading-5">
                 <span className="font-bold">{wallet.nickname}</span> · {PROVIDER_LABELS[collector.provider]}
                 <br />
                 <span className="text-sand-light">
@@ -164,7 +166,7 @@ export function ReviewDialog(props: ReviewDialogProps) {
           <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
             <DialogClose
               disabled={props.submitting}
-              className={cn('h-[45px] rounded-[8px] border border-border-soft px-5 text-[15px] text-cream hover:border-copper disabled:opacity-60', focusRing)}
+              className={cn('min-h-[45px] rounded-[8px] border border-border-soft px-5 py-3 text-[15px] text-cream hover:border-copper disabled:opacity-60', focusRing)}
             >
               Voltar e editar
             </DialogClose>
@@ -173,7 +175,7 @@ export function ReviewDialog(props: ReviewDialogProps) {
               onClick={props.onConfirm}
               disabled={blocked || props.changed}
               aria-describedby={!connected ? 'review-wallet' : undefined}
-              className={cn('h-[45px] rounded-[8px] bg-copper px-5 text-[15px] font-bold text-ink hover:bg-copper-light disabled:cursor-not-allowed disabled:opacity-50', focusRing)}
+              className={cn('min-h-[45px] rounded-[8px] bg-copper px-5 py-3 text-[15px] font-bold text-ink hover:bg-copper-light disabled:cursor-not-allowed disabled:opacity-50', focusRing)}
             >
               {props.submitting ? 'Enviando pedido…' : quote ? `Confirmar e pagar ${formatEth(quote.totalEth)}` : 'Confirmar e pagar'}
             </button>
@@ -186,9 +188,9 @@ export function ReviewDialog(props: ReviewDialogProps) {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between gap-3">
-      <dt className="text-sand-light">{label}</dt>
-      <dd>{value}</dd>
+    <div className="flex flex-wrap justify-between gap-x-3 gap-y-1">
+      <dt className="min-w-0 text-sand-light">{label}</dt>
+      <dd className="ml-auto">{value}</dd>
     </div>
   )
 }

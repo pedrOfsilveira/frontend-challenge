@@ -39,7 +39,7 @@ function Newsletter() {
         setMessage(parsed.success ? 'As inscrições na newsletter ainda não estão abertas.' : (parsed.error.issues[0]?.message ?? 'E-mail inválido.'))
       }}
     >
-      <label htmlFor={id} className="text-lg leading-4 font-bold text-cream">
+      <label htmlFor={id} className="text-lg leading-6 font-bold text-cream">
         Antecipe-se ao próximo lançamento
       </label>
       <div className="mt-1 flex h-10 overflow-hidden rounded-md bg-surface-dark shadow-[0_0_10px_rgba(10,6,4,0.45)]">
@@ -52,7 +52,7 @@ function Newsletter() {
           aria-describedby={`${id}-msg`}
           className="min-w-0 flex-1 bg-transparent px-3 text-sm text-cream placeholder:text-sand focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-copper-light"
         />
-        <button type="submit" className="w-[85px] rounded-r-md bg-copper pl-4 pr-1 text-lg leading-4 font-bold text-ink hover:bg-copper-light">
+        <button type="submit" className="w-[85px] shrink-0 rounded-r-md bg-copper px-3 text-lg leading-6 font-bold text-ink hover:bg-copper-light">
           Enviar
         </button>
       </div>
@@ -65,8 +65,8 @@ function Newsletter() {
 
 function LinkColumn({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-2 text-cream">
-      <h2 className="text-lg leading-4 font-bold">{title}</h2>
+    <div className="flex min-w-0 flex-col gap-2 text-cream">
+      <h2 className="text-lg leading-6 font-bold">{title}</h2>
       <ul className="text-sm leading-[30px]">{children}</ul>
     </div>
   )
@@ -76,24 +76,24 @@ function LinkColumn({ title, children }: { title: string; children: React.ReactN
 export function SiteFooter() {
   return (
     <footer className="page-container pb-6">
-      <div className="bg-surface-card px-4 py-8 lg:h-[250px] lg:px-8">
-        <div className="grid gap-8 md:grid-cols-2 lg:flex lg:items-stretch lg:justify-between lg:gap-0">
+      <div className="bg-surface-card px-4 py-8 xl:min-h-[250px] xl:px-8">
+        <div className="grid min-w-0 gap-8 md:grid-cols-2 xl:flex xl:items-stretch xl:justify-between xl:gap-0">
           {FEATURES.map((feature) => (
-            <div key={feature.mark} className="flex flex-col gap-3 px-4 lg:flex-1 lg:border-r lg:border-copper">
+            <div key={feature.mark} className="flex min-w-0 flex-col gap-3 px-4 xl:flex-1 xl:border-r xl:border-copper">
               <span aria-hidden className="grid size-[74px] place-items-center rounded-full bg-copper text-heading font-bold text-ink">
                 {feature.mark}
               </span>
-              <h2 className="text-[17px] leading-4 font-bold text-cream">{feature.title}</h2>
+              <h2 className="text-[17px] leading-6 font-bold text-cream">{feature.title}</h2>
               <p className="w-[204px] max-w-full text-sm leading-[22px] text-sand-light">{feature.text}</p>
             </div>
           ))}
-          <div className="px-4 lg:w-[357px]">
+          <div className="min-w-0 px-4 xl:w-[357px]">
             <Newsletter />
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 bg-surface-dark px-8 py-8 text-sm leading-[22px] text-cream sm:grid-cols-2 lg:h-[88px] lg:grid-cols-[1fr_1fr_1fr_228px] lg:items-center lg:gap-[92px] lg:py-0">
+      <div className="grid gap-4 bg-surface-dark px-8 py-8 text-sm leading-[22px] text-cream sm:grid-cols-2 lg:min-h-[88px] lg:grid-cols-[repeat(3,minmax(0,1fr))_228px] lg:items-center lg:gap-8 lg:py-4 xl:gap-[92px] xl:py-0">
         <span className="font-bold tracking-[0.1em]">KURIO</span>
         <p>
           Feito para colecionadores,
@@ -108,7 +108,7 @@ export function SiteFooter() {
         </a>
       </div>
 
-      <div className="grid gap-8 bg-surface-card p-8 sm:grid-cols-2 lg:h-[236px] lg:grid-cols-[1fr_1fr_1fr_228px] lg:gap-[124px]">
+      <div className="grid gap-8 bg-surface-card p-8 sm:grid-cols-2 lg:min-h-[236px] lg:grid-cols-[repeat(3,minmax(0,1fr))_228px] xl:gap-[124px]">
         <LinkColumn title="Meu perfil">
           <li>
             <Link to="/perfil" className="hover:text-copper-light">
@@ -137,9 +137,9 @@ export function SiteFooter() {
             </li>
           ))}
         </LinkColumn>
-        <div className="flex flex-col gap-8">
-          <div className="flex w-[190px] flex-col gap-5">
-            <h2 className="text-lg leading-4 font-bold text-cream">Redes sociais</h2>
+        <div className="flex min-w-0 flex-col gap-8">
+          <div className="flex w-[190px] max-w-full flex-col gap-5">
+            <h2 className="text-lg leading-6 font-bold text-cream">Redes sociais</h2>
             <ul className="flex gap-2.5" aria-label="Redes sociais (perfis ainda não publicados)">
               {SOCIAL.map((item) => (
                 <li key={item.name}>
@@ -149,8 +149,8 @@ export function SiteFooter() {
             </ul>
           </div>
           <div className="flex flex-col gap-3">
-            <h2 className="text-lg leading-4 font-bold text-cream">Carteiras compatíveis</h2>
-            <p className="flex h-[26px] items-center justify-center rounded-md border border-border-soft bg-surface-dark text-[9px] font-bold tracking-[0.1px] whitespace-pre text-copper-light">
+            <h2 className="text-lg leading-6 font-bold text-cream">Carteiras compatíveis</h2>
+            <p className="flex min-h-[26px] items-center justify-center rounded-md border border-border-soft bg-surface-dark px-2 py-1 text-center text-[9px] leading-4 font-bold tracking-[0.1px] text-copper-light">
               {'METAMASK  •  WALLETCONNECT  •  COINBASE'}
             </p>
           </div>
