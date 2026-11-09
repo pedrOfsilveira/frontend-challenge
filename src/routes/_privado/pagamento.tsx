@@ -210,7 +210,9 @@ function CheckoutForm({ userId, cart, wallets, profile }: { userId: string; cart
 
   const id = (field: CheckoutField) => `${ids}-${field}`
   const issues = quoteState.stale ? [] : (quoteQuery.data?.issues ?? []).map((issue) => describeIssue(issue, cart))
-  const canReview = Boolean(quoteQuery.data && quoteQuery.data.lines.length > 0)
+  // Placeholder é a cotação da rede anterior: revisar sobre ela registraria como "vista" uma cotação
+  // que não vale para a rede escolhida e acusaria mudança falsa quando a nova chegasse (bug C-1).
+  const canReview = Boolean(quoteQuery.data && !quoteQuery.isPlaceholderData && quoteQuery.data.lines.length > 0)
 
   const collectorFields = (
     <div className="grid gap-x-6 gap-y-3 lg:grid-cols-2">

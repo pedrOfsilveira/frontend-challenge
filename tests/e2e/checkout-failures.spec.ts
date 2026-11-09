@@ -326,9 +326,8 @@ test('troca de rede usa a carteira dessa rede e muda a taxa e o total', async ({
 })
 
 test('revisar logo após trocar de rede não acusa mudança de preço/estoque/cupom', async ({ page, isMobile }) => {
-  // BUG C-1 (NOTES/handoff-c.md): a revisão guarda como "vista" a cotação placeholder da rede
-  // anterior; quando a cotação da nova rede chega, acusa falsamente mudança e exige reconfirmação.
-  test.fail()
+  // Regressão do bug C-1: com a cotação da rede anterior ainda como placeholder, "Confirmar compra"
+  // espera a cotação da nova rede; a revisão não acusa mudança que a pessoa não causou.
   const networkField = await leoCheckout(page, isMobile)
   await networkField.selectOption('polygon')
   await shownTotal(page, '0.992')
