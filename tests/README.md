@@ -1,53 +1,146 @@
-# Verificação
+# Testes e auditoria
 
-Instalação: `pnpm install --frozen-lockfile --ignore-scripts`, depois
-`pnpm exec playwright install chromium`. O worker MSW já está em `public/`.
+Os resultados da revisão entregue estão pendentes de validação final. <!-- FINAL: totais por comando e commit validado -->
+Este guia descreve como executar as verificações e o que cada uma cobre. Os
+números finais ficam em [docs/evidencias.md](../docs/evidencias.md#resultado-da-validação-final).
 
-- `pnpm typecheck`: inclui a aplicação, a configuração e os testes E2E.
-- `pnpm lint`, `pnpm build`, `pnpm test`: lint, build e testes unitários.
-- `pnpm test:e2e`: build de produção + preview, Chromium em 1440×1000 e 390×844.
-- `pnpm test:e2e:report`: relatório HTML da última execução.
-- `pnpm test:e2e --update-snapshots`: atualizar baselines após revisão visual.
-- `E2E_BASE_URL=https://... pnpm test:e2e`: executar contra um deploy com mocks.
-- `E2E_BROWSER_CHANNEL=chrome pnpm test:e2e`: alternativa usando Chrome instalado.
-- `pnpm audit:lighthouse`: início e detalhe, três execuções por perfil mobile/desktop.
+## Instalação
 
-Cada E2E recebe um contexto de navegador novo e restaura o servidor simulado com
-`?mock-reset`. A autenticação e as operações passam pela interface e por
-Axios/MSW. Controles `window.__kurioMock` só configuram o servidor simulado
-(latência, falha, resultado de pagamento, mudança de preço e queda do socket).
-Não há interceptação de respostas pelo Playwright nem injeção no cache da UI.
+```sh
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm exec playwright install chromium
+```
 
-O cenário `hold` permite verificar o estado pendente antes de disparar a decisão
-do pagamento; a interface recebe o resultado pelo cliente Socket.IO real.
-O teste de reconexão muda o pedido enquanto o servidor socket está pausado e
-verifica sua recuperação por REST. Leituras de `snapshot()` são evidência
-adicional de que o retry não criou um segundo pedido.
+O worker do MSW já está em `public/`. Nenhum script de instalação precisa rodar.
 
-As baselines cobrem início, detalhe, carrinho e pagamento. Dados vêm do seed,
-locale/timezone são fixos, movimento é reduzido e fontes/imagens visíveis
-terminam de carregar antes da captura. Report HTML e traces de falha são gerados
-em `playwright-report/` e `test-results/` (não versionados).
+## Comandos
 
-`responsive.spec.ts` verifica 320/390/414/768/1024/1440 px nos dois perfis de
-navegador. Confere a largura real do documento contra o viewport solicitado,
-conteúdo e botões inteiros nas promoções, altura do hero em 414 px, revisão de
-compra sem overflow interno (inclusive o botão de fechar) e rótulos longos de
-carteiras. Capturas das promoções e da revisão ficam nos artefatos de cada teste;
-esses checks complementam as baselines do primeiro viewport.
+| Comando | O que faz |
+|---|---|
+| `pnpm typecheck` | Gera as rotas e verifica a aplicação, a configuração e os E2E (`tsconfig.e2e.json`). |
+| `pnpm lint` | ESLint. |
+| `pnpm test` | Vitest: ETH, search params, idempotência e formulário de checkout, domínio de pedidos e auth do mock, ledger, aplicação de eventos e reconciliação. |
+| `pnpm build` | Build de produção (com mocks, por `.env.production`). |
+| `pnpm test:e2e` | Build + preview em `127.0.0.1:4173`, Chromium em 1440×1000 (`chromium-desktop`) e 390×844 (`chromium-mobile`). |
+| `pnpm test:e2e:report` | Abre o relatório HTML da última execução. |
+| `pnpm exec playwright test --list` | Lista os testes sem abrir navegador. |
+| `pnpm audit:lighthouse` | Build + preview em `127.0.0.1:4175`; início e detalhe, 3 execuções por perfil. |
 
-`home-polish.spec.ts` cobre paginação intermediária em telas estreitas, rodapé
-livre da navegação fixa, áreas de toque das abas e filtros em retrato/paisagem.
-Confere cabeçalho e ações fixos no painel, rolagem das opções, retorno de foco e
-axe no estado aberto. `header.spec.ts` verifica alinhamento em
-1024/1264/1280/1440 px, busca sem deslocar o menu, navegação por hash com apenas
-o item correto ativo, teclado, login e acesso a favoritos.
+Opções úteis:
 
-A análise axe verifica regras WCAG automatizáveis; não substitui teste manual
-de leitor de tela, teclado, zoom e comparação com o Figma.
+- `E2E_BASE_URL=https://… pnpm test:e2e` roda contra um servidor existente com mocks
+  (sem build nem preview próprios).
+- `E2E_BROWSER_CHANNEL=chrome pnpm test:e2e` usa o Chrome instalado.
+- `pnpm test:e2e --update-snapshots` só depois de revisar a diferença visual. Não
+  atualize baselines para fazer a suíte passar.
 
-O script Lighthouse usa o build completo e o cenário padrão: não desativa
-imagens, fontes, MSW ou Socket.IO. Pode usar `CHROME_PATH=/caminho/do/chrome` e
-`LIGHTHOUSE_BASE_URL=https://...` para auditar um servidor já publicado.
-Relatórios HTML/JSON e medianas ficam em `reports/lighthouse/`. Resultados abaixo
-das metas fazem o comando terminar com exit 1 e devem ter suas causas registradas.
+Configuração (`playwright.config.ts`): `fullyParallel`, 2 workers, sem retries,
+locale `pt-BR`, timezone `America/Sao_Paulo`, movimento reduzido,
+`trace: retain-on-failure` e captura de tela em falha. O relatório HTML vai para
+`playwright-report/`, e traces e capturas para `test-results/` (os dois fora do Git).
+
+## Checkout limpo
+
+Para provar que a entrega não depende de arquivos locais, clone a revisão em um
+diretório novo e rode:
+
+```sh
+git clone https://github.com/pedrOfsilveira/frontend-challenge kurio-clean
+cd kurio-clean
+git checkout <sha>
+pnpm install --frozen-lockfile --ignore-scripts
+pnpm typecheck && pnpm lint && pnpm test && pnpm build
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+Arquivos ignorados (`node_modules/`, `dist/`, `src/routeTree.gen.ts`, relatórios)
+são gerados por esses comandos. Resultado na revisão entregue: pendente de validação final.
+<!-- FINAL: SHA, data e resultado do checkout limpo -->
+
+## Execução isolada em paralelo
+
+Duas execuções na mesma cópia disputam `dist/`, a porta 4173,
+`playwright-report/` e `test-results/`. Para rodar em paralelo (por exemplo, em
+worktrees diferentes), cada execução deve ter build, porta e saídas próprios:
+
+```sh
+# terminal 1, na cópia A
+pnpm build
+pnpm preview --host 127.0.0.1 --port 4181 --strictPort
+
+# terminal 2, na cópia A
+PLAYWRIGHT_HTML_OUTPUT_DIR=/tmp/kurio-a-report \
+E2E_BASE_URL=http://127.0.0.1:4181 \
+pnpm test:e2e tests/e2e/realtime.spec.ts --output=/tmp/kurio-a-results
+```
+
+Use outra porta e outras pastas na cópia B. Com `E2E_BASE_URL` definido, o
+Playwright não tenta subir o próprio servidor na 4173. Depois de alterar o
+código, refaça o build e reinicie o preview. O Lighthouse não deve rodar junto
+com builds ou suítes de navegador, porque a concorrência distorce as medições.
+
+## Isolamento e controle
+
+- Cada teste recebe um contexto de navegador novo (storage vazio) e abre
+  `/?mock-reset` (`helpers.ts › reset`), que restaura o servidor simulado
+  inteiro e zera a latência.
+- Login, cadastro e operações passam pela interface e pelo Axios/MSW. Nenhum
+  teste usa `page.route` nem injeta dados no cache da interface.
+- `window.__kurioMock` só configura o servidor simulado: latência, falhas,
+  resultado do pagamento, preço/estoque, expiração, retenção de respostas
+  (`holdNext`/`releaseHeld`) e queda do socket. A interface recebe as mudanças
+  pelo REST ou pelo `socket.io-client` real.
+- Tempo: `page.clock` controla a validade da cotação; `setPaymentOutcome('hold')`
+  e `settlePendingOrders` decidem quando o pagamento termina; `holdNext` define
+  exatamente quando uma resposta REST calculada antes de um evento é entregue.
+- `snapshot()` e a contagem de `POST /api/orders` são evidência complementar de
+  que retries não criaram um segundo pedido. A asserção principal observa a interface.
+
+## Mapa dos cenários
+
+Itens do §9 do enunciado e os testes que os exercitam:
+
+| # | Cenário | Testes |
+|---|---|---|
+| 1 | Busca, filtros combinados, ordenação, paginação, histórico | `catalog.spec`, `requirements-gaps.spec` (parâmetros enviados, ordem exibida, resposta fora de ordem) |
+| 2 | Detalhe direto e recurso inexistente | `catalog.spec`, `requirements-gaps.spec` (esgotado, limite de quantidade) |
+| 3 | Cadastro, login, expiração, logout, troca de usuário | `session.spec`, `account-failures.spec`, `purchase.spec` |
+| 4 | Favoritos, falha de mutation e recuperação | `catalog.spec`, `favorites.spec` |
+| 5 | Carrinho, quantidades, remoção, cupom, persistência | `cart.spec`, `checkout-failures.spec` (cupom na revisão), `purchase.spec` (carrinho do visitante após login) |
+| 6 | Compra completa até o recibo confirmado | `purchase.spec` |
+| 7 | Pagamento recusado, clique repetido, timeout com o mesmo pedido | `purchase.spec`, `realtime.spec`, `checkout-failures.spec` (protocolo de idempotência, carteira) |
+| 8 | Perfil, avatar, senha, carteiras, erros de validação | `account.spec`, `account-failures.spec` |
+| 9 | Preço/disponibilidade via Socket.IO no checkout | `realtime.spec`, `checkout-failures.spec`, `realtime-consistency.spec` (catálogo com filtro, ordem e paginação) |
+| 10 | Eventos duplicados/antigos, desconexão, pedido pendente | `realtime.spec`, `realtime-consistency.spec` (resposta em voo no CONNECT e na primeira carga) |
+| 11 | Teclado, foco de diálogos, formulários | `session.spec`, `home-polish.spec`, `header.spec`, `accessibility.spec` |
+| 12 | Skeleton em rede lenta, falha e nova tentativa | `catalog.spec` |
+
+Layout e regressão visual:
+
+- `visual.spec.ts` compara início, detalhe, carrinho e pagamento nos dois projetos
+  (8 baselines em `visual.spec.ts-snapshots/`). Os dados vêm da seed, e
+  locale/timezone são fixos. Fontes e imagens visíveis terminam de carregar antes da captura.
+- `responsive.spec.ts` verifica 320/390/414/768/1024/1440 px: largura do
+  documento, promoções inteiras, revisão sem overflow interno e rótulos longos de carteira.
+- `home-polish.spec.ts`, `header.spec.ts` e `nft-mobile-layout.spec.ts` cobrem
+  filtros no mobile, paginação estreita, alinhamento do cabeçalho, alvos de toque
+  e texto a 200% no detalhe mobile.
+- `accessibility.spec.ts` roda axe nos fluxos principais. Axe cobre regras
+  automatizáveis; não substitui leitor de tela, zoom e comparação com o Figma.
+
+Lacunas conhecidas (sem E2E dedicado): aviso de redução de estoque na mescla do
+carrinho do visitante; skeletons do detalhe e do resumo do carrinho em rede
+lenta; mudança de preço com a página `/carrinho` aberta; reenvio de
+`order.updated` de outra conta. Ver [docs/evidencias.md](../docs/evidencias.md).
+
+## Lighthouse
+
+`scripts/lighthouse.mjs` usa o build completo e o cenário padrão, sem desativar
+imagens, fontes, MSW ou Socket.IO. Grava HTML/JSON de cada execução,
+`summary.json` (versões e ambiente) e `summary.md` (medianas, LCP, CLS e TBT) em
+`reports/lighthouse/`. Termina com exit 1 se alguma mediana ficar abaixo das
+metas (P 90, A 95, BP 95, SEO 90). Aceita `CHROME_PATH` e `LIGHTHOUSE_BASE_URL`.
+
+Os relatórios versionados hoje são anteriores à versão final. A auditoria do
+build final está pendente de validação final. <!-- FINAL: data/commit da auditoria final em reports/lighthouse -->
