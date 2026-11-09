@@ -8,13 +8,22 @@ import { setTimeout } from 'node:timers/promises'
 import { chromium } from '@playwright/test'
 
 const baseURL = process.env.LIGHTHOUSE_BASE_URL ?? 'http://127.0.0.1:4175'
-const output = path.resolve('reports/lighthouse')
+// Overrides para medições exploratórias (não sobrescrevem os relatórios versionados).
+const output = path.resolve(process.env.LIGHTHOUSE_OUTPUT_DIR ?? 'reports/lighthouse')
+const runsPerTarget = Number(process.env.LIGHTHOUSE_RUNS ?? 3)
+const pick = (value, all) => value ? value.split(',').map((item) => item.trim()).filter((item) => all.includes(item)) : all
 const cli = fileURLToPath(import.meta.resolve('lighthouse/cli/index.js'))
 const chromePath = process.env.CHROME_PATH ?? (existsSync(chromium.executablePath()) ? chromium.executablePath() : '/opt/google/chrome/chrome')
 const categories = ['performance', 'accessibility', 'best-practices', 'seo']
 const targets = { performance: 90, accessibility: 95, 'best-practices': 95, seo: 90 }
-const pages = { inicio: '/', detalhe: '/nft/emerald-ape-042' }
-const median = (values) => [...values].sort((a, b) => a - b)[1]
+const allPages = { inicio: '/', detalhe: '/nft/emerald-ape-042' }
+const pages = Object.fromEntries(pick(process.env.LIGHTHOUSE_PAGES, Object.keys(allPages)).map((page) => [page, allPages[page]]))
+const profiles = pick(process.env.LIGHTHOUSE_PROFILES, ['mobile', 'desktop'])
+const median = (values) => {
+  const sorted = [...values].sort((a, b) => a - b)
+  const middle = Math.floor(sorted.length / 2)
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2
+}
 let server
 
 function run(command, args, options = {}) {
@@ -45,16 +54,17 @@ try {
   const measurements = []
   // Sequential runs: never compete with another audit from this script.
   for (const [page, route] of Object.entries(pages)) {
-    for (const profile of ['mobile', 'desktop']) {
+    for (const profile of profiles) {
       const runs = []
-      for (let index = 1; index <= 3; index++) {
+      for (let index = 1; index <= runsPerTarget; index++) {
         const prefix = path.join(output, `${page}-${profile}-${index}`)
-        console.log(`Lighthouse: ${page}, ${profile}, execução ${index}/3`)
+        console.log(`Lighthouse: ${page}, ${profile}, execução ${index}/${runsPerTarget}`)
         await run(process.execPath, [cli, new URL(route, baseURL).href,
           '--output=html', '--output=json', `--output-path=${prefix}`,
           '--only-categories=performance,accessibility,best-practices,seo',
           '--chrome-flags=--headless --no-sandbox --disable-dev-shm-usage', '--quiet',
           ...(profile === 'desktop' ? ['--preset=desktop'] : []),
+          ...(process.env.LIGHTHOUSE_SAVE_ASSETS ? ['--save-assets'] : []),
         ], { env: { ...process.env, CHROME_PATH: chromePath } })
         const report = JSON.parse(await readFile(`${prefix}.report.json`, 'utf8'))
         if (report.runtimeError) throw new Error(report.runtimeError.message)
@@ -82,11 +92,11 @@ try {
   const summary = { measuredAt: new Date().toISOString(), baseURL, environment: {
     node: process.version, platform: os.platform(), release: os.release(), arch: os.arch(),
     cpu: os.cpus()[0]?.model, cores: os.cpus().length, memoryBytes: os.totalmem(), chromePath,
-    conditions: 'Build de produção, cenário padrão dos mocks, sem sessão, Chrome novo por execução, throttling padrão mobile ou preset desktop; três medições sequenciais por página/perfil.',
+    conditions: `Build de produção, cenário padrão dos mocks, sem sessão, Chrome novo por execução, throttling padrão mobile ou preset desktop; ${runsPerTarget} medições sequenciais por página/perfil.`,
   }, targets, measurements }
   await writeFile(path.join(output, 'summary.json'), `${JSON.stringify(summary, null, 2)}\n`)
   const rows = measurements.map(({ page, profile, median: m }) => `| ${page} | ${profile} | ${m.performance} | ${m.accessibility} | ${m['best-practices']} | ${m.seo} | ${Math.round(m.lcpMs)} | ${m.cls.toFixed(3)} | ${Math.round(m.tbtMs)} |`)
-  await writeFile(path.join(output, 'summary.md'), `# Lighthouse — medianas de três execuções\n\n${summary.environment.conditions}\n\n| Página | Perfil | P | A | BP | SEO | LCP (ms) | CLS | TBT (ms) |\n|---|---|---:|---:|---:|---:|---:|---:|---:|\n${rows.join('\n')}\n\nAmbiente e versões: [summary.json](summary.json). Relatórios individuais HTML/JSON neste diretório. As metas são P ≥90, A ≥95, BP ≥95 e SEO ≥90.\n`)
+  await writeFile(path.join(output, 'summary.md'), `# Lighthouse — medianas de ${runsPerTarget} execuções\n\n${summary.environment.conditions}\n\n| Página | Perfil | P | A | BP | SEO | LCP (ms) | CLS | TBT (ms) |\n|---|---|---:|---:|---:|---:|---:|---:|---:|\n${rows.join('\n')}\n\nAmbiente e versões: [summary.json](summary.json). Relatórios individuais HTML/JSON neste diretório. As metas são P ≥90, A ≥95, BP ≥95 e SEO ≥90.\n`)
   console.log(rows.join('\n'))
   const below = measurements.filter(({ median: m }) => categories.some((category) => m[category] < targets[category]))
   if (below.length) { console.error('Há resultados abaixo das metas. Consulte os relatórios e documente as causas em ARCHITECTURE.md.'); process.exitCode = 1 }
