@@ -32,7 +32,7 @@ export function EditionPicker({ editions, value, onChange, idPrefix }: { edition
       <legend className="mb-2 text-[15px] leading-4 font-bold text-cream lg:mb-3">
         <Term id="edition">Edição</Term>:
       </legend>
-      <div className="flex flex-wrap gap-3 lg:gap-1.5">
+      <div className="flex flex-wrap gap-x-3 gap-y-4 lg:gap-1.5">
         {editions.map((edition) => {
           const selected = edition.id === value
           const soldOut = edition.available === 0
@@ -47,7 +47,8 @@ export function EditionPicker({ editions, value, onChange, idPrefix }: { edition
               aria-label={`Edição ${edition.label}${soldOut ? ', esgotada' : `, ${edition.available} disponíveis`}`}
               onClick={() => !soldOut && onChange(edition.id)}
               className={cn(
-                'min-h-11 min-w-11 rounded-full border px-2 py-2 transition-colors duration-150 text-sm leading-normal whitespace-normal [overflow-wrap:anywhere] lg:min-h-7 lg:min-w-9 lg:rounded-[50%] lg:px-1.5 lg:py-1 lg:leading-4',
+                // Oval de 28 px do Figma; no toque, o ::after estende a área para 44 × 44 px sem mudar o desenho.
+                'relative min-h-7 min-w-9 rounded-[50%] border px-1.5 py-1 text-sm leading-4 whitespace-normal [overflow-wrap:anywhere] transition-colors duration-150 after:absolute after:-inset-x-[5px] after:-inset-y-[9px] lg:after:hidden',
                 selected ? 'border-copper font-medium text-copper-light' : 'border-border text-sand-light',
                 !selected && !soldOut && 'hover:border-border-soft hover:text-cream',
                 soldOut && 'cursor-not-allowed text-sand-light/50 line-through',
@@ -69,14 +70,18 @@ export function EditionPicker({ editions, value, onChange, idPrefix }: { edition
  */
 export function QuantityStepper({ value, max, onChange, size = 'lg', label = 'Quantidade' }: { value: number; max: number; onChange: (next: number) => void; size?: 'sm' | 'lg'; label?: string }) {
   const sm = size === 'sm'
+  /*
+   * Alvo de toque de 44 × 44 px sem mudar a geometria do Figma: as margens negativas
+   * devolvem ao layout só o tamanho do círculo desenhado (20 × 30 ou 33 × 49,5).
+   */
   const button = cn(
     'group grid min-h-[44px] min-w-[44px] place-items-center rounded-[33px] disabled:cursor-not-allowed disabled:opacity-40',
-    !sm && 'lg:min-h-[49.5px] lg:min-w-[33px]',
+    sm ? '-mx-3 -my-[7px]' : '-mx-[5.5px] lg:mx-0 lg:min-h-[49.5px] lg:min-w-[33px]',
     focusRing,
   )
   const icon = sm ? 16 : 26.4
   return (
-    <div role="group" aria-label={label} className="flex shrink-0 items-center gap-1 lg:gap-3">
+    <div role="group" aria-label={label} className="flex shrink-0 items-center gap-3">
       <button type="button" aria-label="Diminuir quantidade" disabled={value <= 1} onClick={() => onChange(value - 1)} className={button}>
         <span aria-hidden className={cn('grid place-items-center rounded-[33px] border border-ink bg-copper shadow-[0_6.6px_9.9px_rgba(20,13,10,0.15)] transition-[background-color,transform] duration-150 group-hover:bg-copper-light motion-safe:group-active:translate-y-px', sm ? 'h-[30px] w-5' : 'h-[49.5px] w-[33px]')}>
           <img src={sm ? mobileMinus : minusIcon} alt="" width={icon} height={icon} />
