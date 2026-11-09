@@ -84,17 +84,21 @@ export function CartTable({ lines, quoteLines, actions }: { lines: CartLine[]; q
         {lines.map((line) => {
           const warning = stockWarning(line)
           return (
-            <tr key={line.id} className={cn('h-[70px] bg-surface-card', line.available === 0 && 'opacity-60')}>
-              <td className="p-0">
+            <tr
+              key={line.id}
+              // Fundo e cantos nas células: o fundo do <tr> não acompanha o arredondamento.
+              className={cn('[&>td]:bg-surface-card [&>td:first-child]:rounded-l-lg [&>td:last-child]:rounded-r-lg', line.available === 0 && 'opacity-60')}
+            >
+              <td className="py-3 pr-4 pl-3">
                 <div className="flex items-center gap-4">
-                  <NftImage src={line.image} alt="" sizes="70px" className="size-[70px] shrink-0 rounded-md object-cover" />
-                  <div className="flex min-w-0 flex-col gap-1 leading-4">
-                    <NftLink line={line} className="truncate text-base font-bold text-cream" />
-                    <span className="truncate text-sm text-sand">ID do token: {line.tokenId}</span>
+                  <NftImage src={line.image} alt="" sizes="70px" className="size-16 shrink-0 rounded-lg object-cover" />
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <NftLink line={line} className="truncate text-base leading-5 font-bold text-cream" />
+                    <span className="truncate text-sm leading-5 text-sand">ID do token: {line.tokenId}</span>
                     {warning ? (
-                      <span className="text-xs leading-3 text-[#ff8a7a]">{warning}</span>
+                      <span className="text-xs leading-4 text-[#ff8a7a]">{warning}</span>
                     ) : (
-                      <span className="text-xs leading-3 text-sand-light">Edição {line.editionLabel}</span>
+                      <span className="text-xs leading-4 text-sand-light">Edição {line.editionLabel}</span>
                     )}
                   </div>
                 </div>

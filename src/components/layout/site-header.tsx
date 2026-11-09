@@ -155,10 +155,8 @@ export function SiteHeader({ section, divider = true }: { section: HeaderSection
               <span
                 key={countChange.count}
                 aria-hidden
-                className={cn(
-                  'absolute top-0 right-0 grid size-[18px] place-items-center rounded-full border-2 border-ink bg-copper text-tiny font-medium text-ink',
-                  countChange.changed && 'animate-tick motion-scale',
-                )}
+                // Sem `cn`: o merge confunde `text-tiny` (tamanho) com uma cor e o descarta diante de `text-ink`.
+                className={`absolute top-0 right-0 grid size-[18px] place-items-center rounded-full border-2 border-ink bg-copper text-tiny leading-none font-medium text-ink ${countChange.changed ? 'animate-tick motion-scale' : ''}`}
               >
                 {count > 99 ? '99+' : count}
               </span>
