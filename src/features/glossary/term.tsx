@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useId, type ReactNode } from 'react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 /** Explicações curtas para quem está colecionando pela primeira vez. */
@@ -33,6 +33,7 @@ export type GlossaryId = keyof typeof GLOSSARY
  */
 export function Term({ id, children }: { id: GlossaryId; children: ReactNode }) {
   const entry = GLOSSARY[id]
+  const titleId = useId()
   return (
     <Popover>
       <PopoverTrigger
@@ -42,8 +43,8 @@ export function Term({ id, children }: { id: GlossaryId; children: ReactNode }) 
         {children}
         <span className="sr-only"> (o que é isso?)</span>
       </PopoverTrigger>
-      <PopoverContent side="top" className="w-[min(18rem,calc(100vw-2rem))] border-border-soft bg-surface-card p-4 shadow-[0_12px_32px_rgb(10_6_4/55%)]">
-        <p className="text-[15px] leading-5 font-bold text-copper-light">{entry.title}</p>
+      <PopoverContent side="top" aria-labelledby={titleId} className="w-[min(18rem,calc(100vw-2rem))] border-border-soft bg-surface-card p-4 shadow-[0_12px_32px_rgb(10_6_4/55%)]">
+        <p id={titleId} className="text-[15px] leading-5 font-bold text-copper-light">{entry.title}</p>
         <p className="mt-1.5 text-sm leading-6 text-sand-light">{entry.text}</p>
       </PopoverContent>
     </Popover>

@@ -75,14 +75,17 @@ export function QuantityStepper({ value, max, onChange, size = 'lg', label = 'Qu
    * devolvem ao layout só o tamanho do círculo desenhado (20 × 30 ou 33 × 49,5).
    */
   const button = cn(
-    'group grid min-h-[44px] min-w-[44px] place-items-center rounded-[33px] disabled:cursor-not-allowed disabled:opacity-40',
+    'group grid min-h-[44px] min-w-[44px] place-items-center rounded-[33px] aria-disabled:cursor-not-allowed aria-disabled:opacity-40',
     sm ? '-mx-3 -my-[7px]' : '-mx-[5.5px] lg:mx-0 lg:min-h-[49.5px] lg:min-w-[33px]',
     focusRing,
   )
   const icon = sm ? 16 : 26.4
+  // aria-disabled (não `disabled`): no limite o botão continua focável, e quem usa teclado não perde o foco.
+  const atMin = value <= 1
+  const atMax = value >= max
   return (
     <div role="group" aria-label={label} className="flex shrink-0 items-center gap-3">
-      <button type="button" aria-label="Diminuir quantidade" disabled={value <= 1} onClick={() => onChange(value - 1)} className={button}>
+      <button type="button" aria-label="Diminuir quantidade" aria-disabled={atMin} onClick={() => !atMin && onChange(value - 1)} className={button}>
         <span aria-hidden className={cn('grid place-items-center rounded-[33px] border border-ink bg-copper shadow-[0_6.6px_9.9px_rgba(20,13,10,0.15)] transition-[background-color,transform] duration-150 group-hover:bg-copper-light motion-safe:group-active:translate-y-px', sm ? 'h-[30px] w-5' : 'h-[49.5px] w-[33px]')}>
           <img src={sm ? mobileMinus : minusIcon} alt="" width={icon} height={icon} />
         </span>
@@ -92,7 +95,7 @@ export function QuantityStepper({ value, max, onChange, size = 'lg', label = 'Qu
           {value}
         </LiveValue>
       </output>
-      <button type="button" aria-label="Aumentar quantidade" disabled={value >= max} onClick={() => onChange(value + 1)} className={button}>
+      <button type="button" aria-label="Aumentar quantidade" aria-disabled={atMax} onClick={() => !atMax && onChange(value + 1)} className={button}>
         <span aria-hidden className={cn('grid place-items-center rounded-[33px] border border-ink bg-copper shadow-[0_6.6px_9.9px_rgba(20,13,10,0.15)] transition-[background-color,transform] duration-150 group-hover:bg-copper-light motion-safe:group-active:translate-y-px', sm ? 'h-[30px] w-5' : 'h-[49.5px] w-[33px]')}>
           <img src={sm ? mobilePlus : plusIcon} alt="" width={icon} height={icon} />
         </span>
