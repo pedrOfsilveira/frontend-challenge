@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useCanGoBack, useNavigate, useRouter } from '@tanstack/react-router'
 import { cn } from 'cn'
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import backArrow from '@/assets/figma/md-arrow-left.svg'
 import toggleOff from '@/assets/figma/toggle-off.svg'
 import radioOn from '@/assets/figma/radio-on.svg'
@@ -167,6 +167,8 @@ function CheckoutForm({ userId, cart, wallets, profile }: { userId: string; cart
     requestAnimationFrame(() => document.getElementById(`${ids}-${first}`)?.focus())
   }
 
+  // Foco volta para quem abriu a revisão: o diálogo desmonta ao fechar e o Radix não consegue restaurar.
+  const reviewOpener = useRef<HTMLElement | null>(null)
   const openReview = () => {
     const result = validateDraft(draft, wallet)
     if (!result.ok) {
@@ -176,6 +178,7 @@ function CheckoutForm({ userId, cart, wallets, profile }: { userId: string; cart
     }
     placeOrder.reset()
     connect.reset()
+    reviewOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
     setReview({ collector: result.collector, note: result.note, seenQuoteId: quoteQuery.data?.id ?? null })
     // Revalida na hora de revisar: preço, estoque, cupom e taxa atuais (R-6.3).
     void quoteQuery.refetch()
@@ -350,6 +353,9 @@ function CheckoutForm({ userId, cart, wallets, profile }: { userId: string; cart
               <span aria-busy={quoteState.stale} className="text-lg leading-4 text-copper-light">{quoteQuery.data ? formatEth(quoteQuery.data.totalEth) : '…'}</span>
             </p>
             {cta('h-[60px] w-full rounded-[40px] bg-linear-[108deg] from-copper from-4% to-copper/80 text-[15px] leading-4')}
+            <p aria-live="polite" className="sr-only">
+              {quoteQuery.data && !quoteState.stale ? `Total atualizado: ${formatEth(quoteQuery.data.totalEth)}` : ''}
+            </p>
           </div>
         </div>
 
@@ -400,7 +406,11 @@ function CheckoutForm({ userId, cart, wallets, profile }: { userId: string; cart
       {review && wallet && (
         <ReviewDialog
           open
-          onOpenChange={(open) => !open && setReview(null)}
+          onOpenChange={(open) => {
+            if (open) return
+            setReview(null)
+            requestAnimationFrame(() => reviewOpener.current?.focus())
+          }}
           quote={quoteQuery.data}
           changed={quoteChanged || failure?.kind === 'quote-changed'}
           onAcknowledge={acknowledge}
