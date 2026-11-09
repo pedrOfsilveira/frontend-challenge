@@ -27,12 +27,16 @@ export function useSlidingIndicator<C extends HTMLElement>(activeSelector: strin
       bar.style.opacity = '1'
     }
 
-    place()
-    // Fonte carregando, quebra de linha, resize: tudo muda a largura dos itens.
-    const observer = new ResizeObserver(place)
+    // Sem place() síncrono: medir aqui forçaria layout no commit (custo medido no primeiro render).
+    // A 1ª notificação do ResizeObserver chega depois do layout e antes do paint; a transição
+    // só liga no quadro seguinte a essa primeira posição.
+    let frame = 0
+    const observer = new ResizeObserver(() => {
+      place()
+      if (!frame && bar.dataset.ready !== 'true') frame = requestAnimationFrame(() => (bar.dataset.ready = 'true'))
+    })
     observer.observe(root)
     for (const child of root.children) observer.observe(child)
-    const frame = requestAnimationFrame(() => (bar.dataset.ready = 'true'))
     return () => {
       observer.disconnect()
       cancelAnimationFrame(frame)

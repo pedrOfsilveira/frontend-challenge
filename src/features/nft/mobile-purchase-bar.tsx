@@ -23,7 +23,7 @@ export function MobilePurchaseBar({ children }: { children: ReactNode }) {
     observer.observe(bar)
     window.addEventListener('resize', update)
     window.visualViewport?.addEventListener('resize', update)
-    update()
+    // Sem update() síncrono: a 1ª notificação do ResizeObserver mede a barra antes do paint, sem layout forçado.
     return () => {
       observer.disconnect()
       window.removeEventListener('resize', update)
