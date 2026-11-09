@@ -56,6 +56,31 @@ test('catálogo, promoções e detalhe cabem entre 320 e 1440 px', async ({ page
   for (const width of widths) {
     await page.setViewportSize({ width, height: 896 })
     await expectPageFits(page)
+    const tabs = page.getByRole('tablist', { name: 'Informações do NFT' })
+    const list = (await tabs.boundingBox())!
+    const triggers = await tabs.getByRole('tab').all()
+    for (const trigger of triggers) {
+      const box = (await trigger.boundingBox())!
+      expect(box.y + box.height).toBeLessThanOrEqual(list.y + list.height + 1)
+      if (width <= 414) expect(box.y).toBeCloseTo(list.y, 0)
+    }
+    await expect(page.getByRole('tabpanel')).toHaveCount(1)
+    expect((await page.getByRole('tabpanel').boundingBox())!.y).toBeGreaterThanOrEqual(list.y + list.height)
+    await tabs.getByRole('tab', { name: /Avaliações/ }).click()
+    await expect(page.getByRole('tabpanel')).toContainText('Os comentários das avaliações')
+    await tabs.getByRole('tab', { name: 'Detalhes do NFT', exact: true }).click()
+    if (width <= 414) {
+      const footer = page.getByRole('contentinfo')
+      const bounds = (await footer.boundingBox())!
+      expect(bounds.x).toBe(0)
+      expect(bounds.width).toBe(width)
+      const socials = (await footer.getByRole('list', { name: /Redes sociais/ }).boundingBox())!
+      expect(socials.x + socials.width / 2).toBeCloseTo(width / 2, 0)
+      const collections = footer.locator('details').filter({ hasText: 'Coleções' })
+      await collections.locator('summary').click()
+      await expect(collections.getByRole('link', { name: 'Arte digital', exact: true })).toBeVisible()
+      await collections.locator('summary').click()
+    }
   }
 })
 

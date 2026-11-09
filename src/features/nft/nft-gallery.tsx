@@ -35,7 +35,7 @@ export function NftGallery({ images, name }: { images: string[]; name: string })
       </ul>
 
       <div className="relative flex aspect-square w-full max-w-[444px] items-center justify-center rounded-md bg-surface-card p-5">
-        <NftImage src={current} alt={alt(index)} sizes="404px" priority className="size-full rounded-3xl object-cover" />
+        <NftImage src={current} alt={alt(index)} sizes="404px" priority data-shared-art="" className="size-full rounded-3xl object-cover" />
         {/* Com DialogTrigger o foco volta para a lupa ao fechar. */}
         <Dialog open={zoom} onOpenChange={setZoom}>
           <DialogTrigger asChild>
@@ -77,7 +77,7 @@ export function MobileGallery({ images, name }: { images: string[]; name: string
       >
         {images.map((src, i) => (
           <li key={`${src}-${i}`} className="w-full shrink-0 snap-start">
-            <NftImage src={src} alt={`${name}, imagem ${i + 1} de ${images.length}`} sizes="100vw" priority={i === 0} className="aspect-[361/356] h-auto w-full object-cover" />
+            <NftImage src={src} alt={`${name}, imagem ${i + 1} de ${images.length}`} sizes="100vw" priority={i === 0} data-shared-art={i === 0 ? '' : undefined} className="aspect-[361/356] h-auto w-full object-cover" />
           </li>
         ))}
       </ul>
@@ -90,7 +90,7 @@ export function MobileGallery({ images, name }: { images: string[]; name: string
               aria-label={`Imagem ${i + 1}`}
               aria-current={i === index ? 'true' : undefined}
               onClick={() => goTo(i)}
-              className={cn('grid h-6 min-w-6 place-items-center rounded-full', focusRing)}
+              className={cn('grid size-[44px] place-items-center rounded-full', focusRing)}
             ><span aria-hidden className={cn('h-[7px] rounded-full bg-copper transition-[width] motion-reduce:transition-none', i === index ? 'w-7' : 'w-[7px]')} /></button>
           ))}
         </div>

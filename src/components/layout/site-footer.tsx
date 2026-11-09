@@ -1,12 +1,10 @@
 import { Link } from '@tanstack/react-router'
-import { useId, useState } from 'react'
 import facebook from '@/assets/figma/social-facebook.svg'
 import instagram from '@/assets/figma/social-instagram.svg'
 import linkedin from '@/assets/figma/social-linkedin.svg'
 import twitter from '@/assets/figma/social-twitter.svg'
 import youtube from '@/assets/figma/social-youtube.svg'
 import type { Category } from '@/api/contracts'
-import { emailRule } from '@/api/contracts'
 import { CATEGORY_LABELS } from '@/features/catalog/search'
 
 const FEATURES = [
@@ -24,94 +22,77 @@ const SOCIAL = [
   { src: youtube, name: 'YouTube' },
 ]
 
-/** Newsletter: valida o e-mail, mas avisa que as inscrições ainda não abriram (não finge sucesso). */
+/** State the current availability before asking the visitor for any data. */
 function Newsletter() {
-  const id = useId()
-  const [message, setMessage] = useState<string | null>(null)
   return (
-    <form
-      className="flex flex-col gap-3"
-      noValidate
-      onSubmit={(event) => {
-        event.preventDefault()
-        const value = new FormData(event.currentTarget).get('email')
-        const parsed = emailRule.safeParse(value)
-        setMessage(parsed.success ? 'As inscrições na newsletter ainda não estão abertas.' : (parsed.error.issues[0]?.message ?? 'E-mail inválido.'))
-      }}
-    >
-      <label htmlFor={id} className="text-lg leading-6 font-bold text-cream">
-        Antecipe-se ao próximo lançamento
-      </label>
-      <div className="mt-1 flex h-10 overflow-hidden rounded-md bg-surface-dark shadow-[0_0_10px_rgba(10,6,4,0.45)]">
-        <input
-          id={id}
-          name="email"
-          type="email"
-          autoComplete="email"
-          placeholder="digite seu e-mail..."
-          aria-describedby={`${id}-msg`}
-          className="min-w-0 flex-1 bg-transparent px-3 text-sm text-cream placeholder:text-sand focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-copper-light"
-        />
-        <button type="submit" className="w-[85px] shrink-0 rounded-r-md bg-copper px-3 text-lg leading-6 font-bold text-ink hover:bg-copper-light">
-          Enviar
-        </button>
-      </div>
-      <p id={`${id}-msg`} role="status" className="min-h-[22px] text-[13px] leading-[22px] text-sand-light">
-        {message ?? 'Receba lançamentos selecionados, histórias de criadores e novidades do mercado.'}
-      </p>
-    </form>
+    <section aria-label="Newsletter" className="flex min-w-0 flex-col gap-3">
+      <h2 className="text-lg leading-normal font-bold text-cream">Antecipe-se ao próximo lançamento</h2>
+      <p className="text-sm leading-6 text-sand-light">As inscrições na newsletter ainda não estão abertas.</p>
+    </section>
   )
 }
 
 function LinkColumn({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="flex min-w-0 flex-col gap-2 text-cream">
-      <h2 className="text-lg leading-6 font-bold">{title}</h2>
-      <ul className="text-sm leading-[30px]">{children}</ul>
-    </div>
+    <>
+      <details className="min-w-0 border-b border-border-soft text-cream sm:hidden">
+        <summary className="cursor-pointer py-3 text-sm leading-6 font-bold focus-visible:outline-2 focus-visible:outline-copper-light">{title}</summary>
+        <ul className="pb-3 text-sm leading-[30px]">{children}</ul>
+      </details>
+      <div className="hidden min-w-0 flex-col gap-2 text-cream sm:flex">
+        <h2 className="text-lg leading-6 font-bold">{title}</h2>
+        <ul className="text-sm leading-[30px]">{children}</ul>
+      </div>
+    </>
   )
 }
 
-/** Rodapé do Figma (desktop); no mobile as colunas empilham. */
-export function SiteFooter() {
+function FooterExtras() {
   return (
-    <footer className="page-container pb-6">
-      <div className="bg-surface-card px-4 py-8 xl:min-h-[250px] xl:px-8">
-        <div className="grid min-w-0 gap-8 md:grid-cols-2 xl:flex xl:items-stretch xl:justify-between xl:gap-0">
+      <div className="bg-surface-card px-6 py-6 sm:px-4 sm:py-8 xl:min-h-[250px] xl:px-8">
+        <div className="grid min-w-0 gap-5 sm:gap-8 md:grid-cols-2 xl:flex xl:items-stretch xl:justify-between xl:gap-0">
           {FEATURES.map((feature) => (
-            <div key={feature.mark} className="flex min-w-0 flex-col gap-3 px-4 xl:flex-1 xl:border-r xl:border-copper">
-              <span aria-hidden className="grid size-[74px] place-items-center rounded-full bg-copper text-heading font-bold text-ink">
+            <div key={feature.mark} className="grid min-w-0 grid-cols-[40px_minmax(0,1fr)] gap-x-3 gap-y-1 sm:flex sm:flex-col sm:gap-3 sm:px-4 xl:flex-1 xl:border-r xl:border-copper">
+              <span aria-hidden className="row-span-2 grid size-10 place-items-center rounded-full bg-copper text-lg sm:size-[74px] sm:text-heading font-bold text-ink">
                 {feature.mark}
               </span>
-              <h2 className="text-[17px] leading-6 font-bold text-cream">{feature.title}</h2>
-              <p className="w-[204px] max-w-full text-sm leading-[22px] text-sand-light">{feature.text}</p>
+              <h2 className="text-sm leading-6 font-bold text-cream sm:text-[17px]">{feature.title}</h2>
+              <p className="max-w-full text-xs leading-5 sm:w-[204px] sm:text-sm sm:leading-[22px] text-sand-light">{feature.text}</p>
             </div>
           ))}
-          <div className="min-w-0 px-4 xl:w-[357px]">
+          <div className="min-w-0 border-t border-border-soft pt-5 sm:border-0 sm:px-4 sm:pt-0 xl:w-[357px]">
             <Newsletter />
           </div>
         </div>
       </div>
+  )
+}
 
-      <div className="grid gap-4 bg-surface-dark px-8 py-8 text-sm leading-[22px] text-cream sm:grid-cols-2 lg:min-h-[88px] lg:grid-cols-[repeat(3,minmax(0,1fr))_228px] lg:items-center lg:gap-8 lg:py-4 xl:gap-[92px] xl:py-0">
+/** Rodapé do Figma; no mobile, benefícios compactos e menus recolhíveis. */
+export function SiteFooter() {
+  return (
+    <footer className="mx-auto w-full pb-6 [overflow-wrap:anywhere] lg:max-w-[calc(var(--container-page)+3rem)] lg:px-6">
+      <div className="hidden sm:block"><FooterExtras /></div>
+
+      <div className="grid grid-cols-1 gap-3 bg-surface-dark px-6 py-5 sm:gap-4 sm:px-8 sm:py-8 text-sm leading-[22px] text-cream sm:grid-cols-2 lg:min-h-[88px] lg:grid-cols-[repeat(3,minmax(0,1fr))_228px] lg:items-center lg:gap-8 lg:py-4 xl:gap-[92px] xl:py-0">
         <span className="font-bold tracking-[0.1em]">KURIO</span>
         <p>
           Feito para colecionadores,
           <br />
           criadores e cultura
         </p>
-        <a href="mailto:contato@email.com" className="hover:text-copper-light">
+        <a href="mailto:contato@email.com" className="inline-flex min-h-11 items-center py-1 hover:text-copper-light sm:min-h-0 sm:py-0">
           contato@email.com
         </a>
-        <a href="tel:+551140028922" className="hover:text-copper-light">
+        <a href="tel:+551140028922" className="inline-flex min-h-11 items-center py-1 hover:text-copper-light sm:min-h-0 sm:py-0">
           +55 11 4002 8922
         </a>
       </div>
 
-      <div className="grid gap-8 bg-surface-card p-8 sm:grid-cols-2 lg:min-h-[236px] lg:grid-cols-[repeat(3,minmax(0,1fr))_228px] xl:gap-[124px]">
+      <div className="grid grid-cols-1 gap-0 bg-surface-card px-6 py-3 sm:grid-cols-2 sm:gap-8 sm:p-8 lg:min-h-[236px] lg:grid-cols-[repeat(3,minmax(0,1fr))_228px] xl:gap-[124px]">
         <LinkColumn title="Meu perfil">
           <li>
-            <Link to="/perfil" className="hover:text-copper-light">
+            <Link to="/perfil" className="inline-flex min-h-11 items-center py-1 hover:text-copper-light sm:min-h-0 sm:py-0">
               Meu perfil
             </Link>
           </li>
@@ -131,33 +112,38 @@ export function SiteFooter() {
         <LinkColumn title="Coleções">
           {FOOTER_CATEGORIES.map((category) => (
             <li key={category}>
-              <Link to="/" search={{ category }} hash="catalogo" className="hover:text-copper-light">
+              <Link to="/" search={{ category }} hash="catalogo" className="inline-flex min-h-11 items-center py-1 hover:text-copper-light sm:min-h-0 sm:py-0">
                 {CATEGORY_LABELS[category]}
               </Link>
             </li>
           ))}
         </LinkColumn>
-        <div className="flex min-w-0 flex-col gap-8">
-          <div className="flex w-[190px] max-w-full flex-col gap-5">
+        <div className="flex min-w-0 flex-col items-center gap-6 py-6 sm:items-start sm:gap-8 sm:py-0">
+          <div className="flex max-w-full flex-col items-center gap-3 sm:items-start sm:gap-5">
             <h2 className="text-lg leading-6 font-bold text-cream">Redes sociais</h2>
-            <ul className="flex gap-2.5" aria-label="Redes sociais (perfis ainda não publicados)">
+            <ul className="flex max-w-full flex-wrap items-center justify-center gap-[10px]" aria-label="Redes sociais (perfis ainda não publicados)">
               {SOCIAL.map((item) => (
-                <li key={item.name}>
-                  <img src={item.src} alt={item.name} width={32} height={32} className="size-[30px]" />
+                <li key={item.name} className="grid size-[32px] shrink-0 place-items-center">
+                  <img src={item.src} alt={item.name} width={32} height={32} className="block" />
                 </li>
               ))}
             </ul>
           </div>
-          <div className="flex flex-col gap-3">
+          <div className="flex max-w-full flex-col gap-3">
             <h2 className="text-lg leading-6 font-bold text-cream">Carteiras compatíveis</h2>
-            <p className="flex min-h-[26px] items-center justify-center rounded-md border border-border-soft bg-surface-dark px-2 py-1 text-center text-[9px] leading-4 font-bold tracking-[0.1px] text-copper-light">
+            <p className="flex min-h-[26px] items-center justify-center rounded-md border border-border-soft bg-surface-dark px-2 py-1 text-center text-[11px] leading-5 sm:text-[9px] sm:leading-4 font-bold tracking-[0.1px] text-copper-light">
               {'METAMASK  •  WALLETCONNECT  •  COINBASE'}
             </p>
           </div>
         </div>
       </div>
 
-      <p className="text-center text-sm leading-[30px] text-cream">© 2026 Kurio. Propriedade digital para todos.</p>
+      <details className="border-t border-border-soft bg-surface-card px-6 sm:hidden">
+        <summary className="cursor-pointer py-3 text-sm leading-6 font-bold text-cream focus-visible:outline-2 focus-visible:outline-copper-light">Sobre a Kurio e novidades</summary>
+        <div className="-mx-6"><FooterExtras /></div>
+      </details>
+
+      <p className="px-6 pt-3 text-center text-xs leading-5 text-cream sm:text-sm sm:leading-[30px]">© 2026 Kurio. Propriedade digital para todos.</p>
     </footer>
   )
 }

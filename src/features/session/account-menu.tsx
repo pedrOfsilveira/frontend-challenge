@@ -20,6 +20,7 @@ export function AccountMenu() {
       {profile.isError && <button type="button" onClick={() => void profile.refetch()} className={link}>Tentar novamente</button>}
       <Link to="/perfil" className={link}>Perfil do colecionador</Link>
       <Link to="/carteiras" className={link}>Carteiras</Link>
+      <Link to="/favoritos" className={link}>Favoritos</Link>
       <Link to="/" className={link}>Explorar o mercado</Link>
       <button type="button" disabled={logout.isPending} onClick={() => logout.mutate()} className={link}>{logout.isPending ? 'Saindo…' : 'Sair da conta'}</button>
       {logout.error && <p role="alert" className="text-sm text-[#ff8a7a]">{logout.error.message} Tente sair novamente.</p>}

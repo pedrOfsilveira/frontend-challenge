@@ -8,3 +8,6 @@ test-results
 playwright-report
 reports
 tests
+.aws
+.agents
+.codex

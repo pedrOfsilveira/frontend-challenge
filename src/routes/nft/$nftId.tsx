@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useCanGoBack, useNavigate, useRouter } from '@tanstack/react-router'
 import { cn } from 'cn'
-import { useState } from 'react'
+import { Check } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import backArrow from '@/assets/figma/md-arrow-left.svg'
 import shopIcon from '@/assets/figma/md-shop.svg'
@@ -10,11 +11,14 @@ import type { Edition, NftDetail } from '@/api/contracts'
 import { isApiError } from '@/api/errors'
 import { SiteFooter } from '@/components/layout/site-footer'
 import { SiteHeader } from '@/components/layout/site-header'
+import { LiveValue, TrendMark } from '@/components/live-value'
 import { MaskIcon } from '@/components/mask-icon'
 import { Skeleton } from '@/components/ui/skeleton'
 import { nftDetailQuery, relatedNftsQuery } from '@/features/catalog/queries'
 import { useAddToCart } from '@/features/cart/use-add-to-cart'
 import { FavoriteButton } from '@/features/favorites/favorite-button'
+import { Term } from '@/features/glossary/term'
+import { MobilePurchaseBar } from '@/features/nft/mobile-purchase-bar'
 import { MobileGallery, NftGallery } from '@/features/nft/nft-gallery'
 import { NftDetailsTabs, RelatedNfts, ShareLinks } from '@/features/nft/nft-sections'
 import { EditionPicker, QuantityStepper, RatingStars } from '@/features/nft/purchase-controls'
@@ -51,9 +55,9 @@ function NftDetailPage() {
   const detail = useQuery(nftDetailQuery(nftId))
 
   return (
-    <>
+    <div data-nft-page className="nft-detail-page">
       <SiteHeader section="market" divider={false} />
-      <main className="page-container flex flex-col gap-16 pb-[200px] lg:gap-24 lg:pt-8 lg:pb-24">
+      <main className="page-container flex flex-col gap-10 pb-12 sm:gap-16 lg:gap-24 lg:pt-8 lg:pb-24">
         {detail.data ? (
           <NftPurchase key={nftId} nft={detail.data} />
         ) : detail.isError ? (
@@ -65,7 +69,7 @@ function NftDetailPage() {
         {detail.data && <RelatedNfts nftId={nftId} />}
       </main>
       <SiteFooter />
-    </>
+    </div>
   )
 }
 
@@ -77,6 +81,15 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
   const addToCart = useAddToCart()
   const [quantity, setQuantity] = useState(1)
   const [status, setStatus] = useState<string | null>(null)
+  /** Última mudança de preço vinda de fora (Socket.IO/refetch): alimenta a seta e o brilho. */
+  const [priceTrend, setPriceTrend] = useState<{ id: number; editionId: string; price: string; dir: 'up' | 'down' } | null>(null)
+  /** Confirmação visual do "adicionar e continuar" (ícone vira ✓ por um instante). */
+  const [added, setAdded] = useState(0)
+  useEffect(() => {
+    if (!added) return
+    const timer = window.setTimeout(() => setAdded(0), 1600)
+    return () => window.clearTimeout(timer)
+  }, [added])
 
   const edition = pickEdition(nft, search.edicao)
   const soldOut = edition.available === 0
@@ -89,6 +102,9 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
     setSeen({ id: edition.id, price: edition.priceEth, available: edition.available })
   } else if (seen.price !== edition.priceEth || seen.available !== edition.available) {
     setSeen({ id: edition.id, price: edition.priceEth, available: edition.available })
+    if (seen.price !== edition.priceEth) {
+      setPriceTrend({ id: (priceTrend?.id ?? 0) + 1, editionId: edition.id, price: edition.priceEth, dir: eth.compare(edition.priceEth, seen.price) > 0 ? 'up' : 'down' })
+    }
     setStatus(
       seen.price !== edition.priceEth
         ? `O preço da edição ${edition.label} mudou de ${formatEth(seen.price)} para ${formatEth(edition.priceEth)}.`
@@ -101,6 +117,7 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
   const selectEdition = (id: string) => {
     setQuantity(1)
     setStatus(null)
+    setPriceTrend(null)
     void navigate({ search: { edicao: id === nft.defaultEditionId ? undefined : id }, replace: true, resetScroll: false })
   }
 
@@ -112,7 +129,10 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
       {
         onSuccess: () => {
           if (then === 'cart') void navigate({ to: '/carrinho' })
-          else setStatus(`${qty} × ${nft.name} (${edition.label}) no carrinho.`)
+          else {
+            setStatus(`${qty} × ${nft.name} (${edition.label}) no carrinho.`)
+            setAdded((n) => n + 1)
+          }
         },
       },
     )
@@ -120,7 +140,13 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
 
   const errorMessage = addToCart.error ? addToCart.error.message : null
   const total = eth.times(edition.priceEth, qty)
-  const availability = soldOut ? 'Esgotado' : `${edition.available} ${edition.available === 1 ? 'disponível' : 'disponíveis'}`
+  const availability = (
+    <LiveValue value={edition.available} compare={(a, b) => a - b} className={cn(edition.available > 0 && edition.available <= 5 && 'font-medium text-copper-light')}>
+      {soldOut ? 'Esgotado' : `${edition.available} ${edition.available === 1 ? 'disponível' : 'disponíveis'}`}
+    </LiveValue>
+  )
+  // O brilho só acompanha a mudança que veio de fora, nunca a troca de edição feita pela pessoa.
+  const trend = priceTrend && priceTrend.editionId === edition.id && priceTrend.price === edition.priceEth ? priceTrend : null
   const feedback = (
     <>
       <p role="status" className="text-sm text-sand-light empty:hidden">
@@ -155,9 +181,12 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
             <div className="flex flex-col gap-3 border-b border-copper/35 pb-3">
               <h1 className="text-[28px] font-bold text-cream">{nft.name}</h1>
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-[22px] leading-4 font-bold text-copper-light">
+                <p className="flex items-center gap-1.5 text-[22px] leading-4 font-bold text-copper-light">
                   <span className="sr-only">Preço da edição {edition.label}: </span>
-                  {formatEth(edition.priceEth)}
+                  <LiveValue value={edition.priceEth} compare={eth.compare} flash={trend !== null}>
+                    {formatEth(edition.priceEth)}
+                  </LiveValue>
+                  {trend && <TrendMark trend={trend.dir} id={trend.id} />}
                 </p>
                 <p className="flex items-center gap-1 text-[15px] text-cream">
                   <RatingStars average={nft.rating.average} />
@@ -207,7 +236,7 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
               type="button"
               aria-label="Voltar"
               onClick={() => (canGoBack ? router.history.back() : void navigate({ to: '/' }))}
-              className={cn('grid size-[35px] place-items-center rounded-full border border-border bg-surface-raised', focusRing)}
+              className={cn('grid size-11 place-items-center rounded-full border border-border bg-surface-raised', focusRing)}
             >
               <img src={backArrow} alt="" width={13} height={7} className="rotate-90" />
             </button>
@@ -215,9 +244,9 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
           </div>
           <MobileGallery images={nft.images} name={nft.name} />
         </div>
-        <div className="-mt-[114px] flex flex-col gap-3 rounded-t-[31px] bg-surface-card px-6 pt-8 pb-6">
+        <div className="-mt-[114px] flex flex-col gap-3 rounded-t-[31px] bg-surface-card px-6 pt-14 pb-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="min-w-0 text-xl leading-6 font-bold text-cream">{nft.name}</h1>
+            <h1 className="min-w-0 text-xl leading-6 font-bold text-cream [overflow-wrap:anywhere]">{nft.name}</h1>
             <p className="flex h-[27px] shrink-0 items-center gap-1 rounded-[32px] border border-copper px-1.5 text-sm leading-4">
               <MaskIcon src={starIcon} width={11.7} height={11.1} className="text-[#e3a44e]" />
               <span className="sr-only">Nota </span>
@@ -239,26 +268,29 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
       </article>
 
       {/* Barra de compra fixa (Figma "Buy Bar"). */}
-      <div className="fixed inset-x-0 bottom-0 z-40 rounded-t-[40px] bg-surface-card px-6 pt-5 pb-9 shadow-[0_0_10px_rgba(10,6,4,0.45)] lg:hidden">
-        <div className="mx-auto flex max-w-[480px] flex-col gap-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+      <MobilePurchaseBar>
+        <div className="nft-buybar-content">
+          <div className="nft-buybar-meta">
+            <div className="flex items-center gap-1">
               <span className="text-[15px] leading-4 font-medium text-sand-light" aria-hidden>
                 Qtd.
               </span>
               <QuantityStepper value={qty} max={max} onChange={setQuantity} size="sm" />
             </div>
-            <p className="text-right text-xl leading-4 font-bold text-copper-light">
+            <p className="flex min-w-0 items-center justify-end gap-1 text-right text-xl leading-6 [overflow-wrap:anywhere] font-bold text-copper-light">
               <span className="sr-only">Total: </span>
-              {formatEth(total)}
+              {trend && <TrendMark trend={trend.dir} id={trend.id} />}
+              <LiveValue value={total} compare={eth.compare} flash={trend !== null}>
+                {formatEth(total)}
+              </LiveValue>
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="nft-buybar-actions">
             <button
               type="button"
               onClick={() => add('cart')}
               disabled={soldOut || addToCart.isPending}
-              className={cn('h-[60px] flex-1 rounded-[40px] bg-linear-[100deg] from-copper from-4% to-copper/80 text-base leading-5 font-bold text-ink disabled:opacity-60 sm:w-[196px] sm:flex-none', focusRing)}
+              className={cn('nft-buybar-submit min-w-0 rounded-[40px] bg-linear-[100deg] from-copper from-4% to-copper/80 px-3 py-3 text-base leading-normal font-bold text-ink [overflow-wrap:anywhere] disabled:opacity-60', focusRing)}
             >
               {soldOut ? 'Esgotado' : addToCart.isPending ? 'Adicionando…' : 'Comprar NFT'}
             </button>
@@ -267,14 +299,18 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
               onClick={() => add('stay')}
               disabled={soldOut || addToCart.isPending}
               aria-label="Adicionar ao carrinho e continuar aqui"
-              className={cn('grid size-[60px] place-items-center rounded-[40px] border border-border bg-surface-raised disabled:opacity-60', focusRing)}
+              className={cn('grid min-h-[60px] w-[60px] place-items-center self-stretch rounded-[40px] border border-border bg-surface-raised disabled:opacity-60', focusRing)}
             >
-              <img src={shopIcon} alt="" width={20} height={20} />
+              {added ? (
+                <Check key={added} aria-hidden className="size-6 animate-confirm text-copper-light motion-scale" strokeWidth={2.5} />
+              ) : (
+                <img src={shopIcon} alt="" width={20} height={20} />
+              )}
             </button>
           </div>
-          <div className="lg:hidden">{feedback}</div>
+          {(status || errorMessage) && <div className="nft-buybar-feedback [overflow-wrap:anywhere]">{feedback}</div>}
         </div>
-      </div>
+      </MobilePurchaseBar>
     </>
   )
 }
@@ -282,15 +318,17 @@ function NftPurchase({ nft }: { nft: NftDetail }) {
 function TokenFacts({ nft }: { nft: NftDetail }) {
   return (
     <>
-      <div className="flex gap-1">
-        <dt>ID do token:</dt>
+      <div className="flex min-w-0 flex-wrap gap-x-1 [overflow-wrap:anywhere]">
+        <dt>
+          <Term id="tokenId">ID do token</Term>:
+        </dt>
         <dd>{nft.tokenId}</dd>
       </div>
-      <div className="flex gap-1">
+      <div className="flex min-w-0 flex-wrap gap-x-1 [overflow-wrap:anywhere]">
         <dt>Coleção:</dt>
         <dd>{nft.collection.name}</dd>
       </div>
-      <div className="flex gap-1">
+      <div className="flex min-w-0 flex-wrap gap-x-1 [overflow-wrap:anywhere]">
         <dt>Atributos:</dt>
         <dd>{nft.attributes.join(', ')}</dd>
       </div>
@@ -346,7 +384,7 @@ function DetailSkeleton() {
         <div className="bg-surface-card px-7 pt-[66px] pb-[84px]">
           <Skeleton className="mx-auto aspect-[361/356] w-full max-w-[480px] rounded-3xl" />
         </div>
-        <div className="-mt-[114px] flex flex-col gap-3 rounded-t-[31px] bg-surface-card px-6 pt-8 pb-6">
+        <div className="-mt-[114px] flex flex-col gap-3 rounded-t-[31px] bg-surface-card px-6 pt-14 pb-6">
           <Skeleton className="h-5 w-2/3" />
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-7 w-1/2" />

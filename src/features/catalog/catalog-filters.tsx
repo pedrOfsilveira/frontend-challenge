@@ -1,7 +1,9 @@
 import { cn } from 'cn'
-import { useState } from 'react'
+import { useId, useState } from 'react'
+import { CheckIcon } from 'lucide-react'
 import { categoryIds, networkIds, type NftListResponse } from '@/api/contracts'
 import { Slider } from '@/components/ui/slider'
+import { Button } from '@/components/ui/button'
 import { eth } from '@/lib/eth'
 import { CATEGORY_LABELS, NETWORK_LABELS, toggleInList, type CatalogSearch } from './search'
 
@@ -33,12 +35,13 @@ function FacetRow({ label, count, active, bold, onToggle }: { label: string; cou
         aria-pressed={active}
         onClick={onToggle}
         className={cn(
-          'flex w-full items-start justify-between text-left text-[15px] leading-10 hover:text-copper-light focus-visible:outline-2 focus-visible:outline-copper-light',
+          'flex min-h-11 w-full items-center justify-between gap-3 py-2 text-left text-sm leading-5 hover:text-copper-light focus-visible:outline-2 focus-visible:outline-copper-light lg:min-h-10 lg:py-0 lg:text-[15px]',
           active ? 'text-copper-light' : 'text-sand-light',
         )}
       >
         <span>{label}</span>
-        <span className={cn('text-right', bold && 'font-bold')}>
+        <span className={cn('flex shrink-0 items-center gap-2 text-right', bold && 'font-bold')}>
+          {active && <CheckIcon aria-hidden className="size-4" />}
           {count === undefined ? '' : `(${count})`}
         </span>
       </button>
@@ -56,8 +59,9 @@ function PriceFilter({ search, range, onChange }: { search: CatalogSearch; range
 
   const [low, high] = value
   return (
-    <div className="flex flex-col gap-3 pl-3">
+    <div className="flex flex-col gap-3 lg:pl-3">
       <Slider
+        className="h-11 [&_[data-slot=slider-thumb]]:size-6 lg:h-[21px] lg:[&_[data-slot=slider-thumb]]:size-[21px]"
         min={bounds.min}
         max={bounds.max}
         step={1}
@@ -71,7 +75,7 @@ function PriceFilter({ search, range, onChange }: { search: CatalogSearch; range
       <p className="text-[15px] text-cream" aria-live="polite">
         Preço: {formatBr(fromCents(low))} - {formatBr(fromCents(high))} ETH
       </p>
-      <button
+      <Button
         type="button"
         disabled={!range}
         onClick={() =>
@@ -80,28 +84,29 @@ function PriceFilter({ search, range, onChange }: { search: CatalogSearch; range
             max: high < bounds.max ? fromCents(high) : undefined,
           })
         }
-        className="self-start rounded-md bg-copper px-3 py-2 text-base leading-5 font-bold text-ink hover:bg-copper-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-light disabled:opacity-60"
+        className="h-auto min-h-11 w-full self-start font-bold lg:min-h-10 lg:w-auto"
       >
         Aplicar
-      </button>
+      </Button>
     </div>
   )
 }
 
 /** Painel de filtros do Figma (310 px): coleções, faixa de preço e rede. Combináveis entre si. */
 export function CatalogFilters({ search, facets, onChange, className }: CatalogFiltersProps) {
+  const id = useId()
   const categoryCount = (id: string) => facets?.categories.find((c) => c.id === id)?.count
   const networkCount = (id: string) => facets?.networks.find((n) => n.id === id)?.count
   const selectedCategories = new Set(search.category?.split(','))
   const selectedNetworks = new Set(search.network?.split(','))
 
   return (
-    <div className={cn('flex flex-col gap-10 bg-surface-card p-5', className)}>
-      <section aria-labelledby="filter-collections" className="flex flex-col gap-3">
-        <h2 id="filter-collections" className="text-lg leading-4 font-bold text-cream">
+    <div className={cn('flex flex-col gap-8 bg-surface-card p-6 lg:gap-10 lg:p-5', className)}>
+      <section aria-labelledby={`${id}-collections`} className="flex flex-col gap-3">
+        <h2 id={`${id}-collections`} className="text-base leading-6 font-bold text-cream lg:text-lg">
           Coleções
         </h2>
-        <ul className="px-3">
+        <ul className="lg:px-3">
           {categoryIds.map((id) => (
             <FacetRow
               key={id}
@@ -115,8 +120,8 @@ export function CatalogFilters({ search, facets, onChange, className }: CatalogF
         </ul>
       </section>
 
-      <section aria-labelledby="filter-price" className="flex flex-col gap-3">
-        <h2 id="filter-price" className="text-lg leading-4 font-bold text-cream">
+      <section aria-labelledby={`${id}-price`} className="flex flex-col gap-3">
+        <h2 id={`${id}-price`} className="text-base leading-6 font-bold text-cream lg:text-lg">
           Faixa de preço
         </h2>
         {/* A URL manda: voltar no histórico ou limpar filtros remonta o slider na posição certa. */}
@@ -128,11 +133,11 @@ export function CatalogFilters({ search, facets, onChange, className }: CatalogF
         />
       </section>
 
-      <section aria-labelledby="filter-network" className="flex flex-col gap-3">
-        <h2 id="filter-network" className="text-lg leading-4 font-bold text-cream">
+      <section aria-labelledby={`${id}-network`} className="flex flex-col gap-3">
+        <h2 id={`${id}-network`} className="text-base leading-6 font-bold text-cream lg:text-lg">
           Rede
         </h2>
-        <ul className="pl-3">
+        <ul className="lg:pl-3">
           {networkIds.map((id) => (
             <FacetRow
               key={id}

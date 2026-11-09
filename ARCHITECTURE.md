@@ -150,6 +150,11 @@ Perfil/carteiras empilham campos e navegação no mobile; auth mantém modal des
 e tela cheia mobile. Fora do escopo, login social/recuperação explicam a
 indisponibilidade; atividade/ofertas/downloads são informativos.
 
+O botão central de scan da barra mobile abre um aviso de indisponibilidade.
+O README original não define sua função; na cópia acessível do Figma, o grupo
+`15:5529` não tem descrição funcional nem interação de protótipo. O aviso explica
+essa lacuna, sem atribuir ao ícone um fluxo de scanner ou um destino de catálogo.
+
 Diferenças funcionais: cabeçalho autenticado mostra Minha conta; mensagens e
 estados não desenhados seguem tokens; pedido pendente/recusado não mostra
 confirmação. Conteúdo e preços vêm do servidor. Prefixo ENS suporta somente

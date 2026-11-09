@@ -6,6 +6,7 @@ import { MobileTabBar } from '@/components/layout/mobile-tab-bar'
 import { SiteFooter } from '@/components/layout/site-footer'
 import { SiteHeader } from '@/components/layout/site-header'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Button } from '@/components/ui/button'
 import { CatalogFilters, type CatalogPatch } from '@/features/catalog/catalog-filters'
 import { CatalogPagination } from '@/features/catalog/catalog-pagination'
 import { CatalogSort, CatalogTabs } from '@/features/catalog/catalog-toolbar'
@@ -45,10 +46,10 @@ function HomePage() {
   const total = data?.total ?? 0
 
   return (
-    <>
+    <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
       <SiteHeader section="home" />
-      <main className="page-container flex flex-col gap-4 pt-10 pb-[150px] lg:gap-24 lg:pt-8 lg:pb-24">
-        <MobileSearchBar q={search.q} onSearch={(q) => void update({ q }, { replace: true })} onOpenFilters={() => setFiltersOpen(true)} activeFilters={activeFilters} />
+      <main className="page-container flex flex-col gap-4 pt-10 pb-12 lg:gap-24 lg:pt-8 lg:pb-24">
+        <MobileSearchBar q={search.q} onSearch={(q) => void update({ q }, { replace: true })} activeFilters={activeFilters} />
         <MobileHero />
         <HomeHero />
 
@@ -137,32 +138,34 @@ function HomePage() {
           </div>
         </section>
 
-        <Promos />
-        <Blog />
+        <div className="mt-6 flex flex-col gap-10 lg:mt-0 lg:gap-24">
+          <Promos />
+          <Blog />
+        </div>
       </main>
-      <SiteFooter />
+      <div className="pb-[calc(150px+env(safe-area-inset-bottom))] lg:pb-0"><SiteFooter /></div>
       <MobileTabBar active="home" />
 
-      <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-        <SheetContent side="bottom" className="max-h-[85dvh] gap-0 overflow-y-auto border-border bg-surface-card p-0 lg:hidden">
-          <SheetHeader className="px-5 pt-5">
+        <SheetContent side="bottom" className="h-[85dvh] max-h-[85dvh] gap-0 overflow-hidden rounded-t-2xl border-border bg-surface-card p-0 lg:hidden">
+          <SheetHeader className="shrink-0 border-b border-border-soft p-6 pr-16">
             <SheetTitle className="text-lg text-cream">Filtros</SheetTitle>
-            <SheetDescription className="text-sand-light">As mudanças são aplicadas na hora.</SheetDescription>
+            <SheetDescription className="text-sand-light">Combine coleções, faixa de preço e rede.</SheetDescription>
           </SheetHeader>
-          <div className="px-5 pt-4">
-            <CatalogSort value={params.sort ?? 'recent'} onChange={(sort) => void update({ sort: sort === 'recent' ? undefined : sort })} />
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div className="px-6 py-5">
+              <CatalogSort variant="field" value={params.sort ?? 'recent'} onChange={(sort) => void update({ sort: sort === 'recent' ? undefined : sort })} />
+            </div>
+            <CatalogFilters className="pt-0" search={search} facets={data?.facets} onChange={(patch) => void update(patch)} />
           </div>
-          <CatalogFilters search={search} facets={data?.facets} onChange={(patch) => void update(patch)} />
-          <div className="sticky bottom-0 flex gap-3 border-t border-border bg-surface-card p-5">
-            <button type="button" onClick={() => void clearFilters()} disabled={!hasFilters} className="flex-1 rounded-md border border-border-soft px-4 py-2 text-sm text-cream disabled:opacity-50">
+          <div className="grid shrink-0 grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] gap-3 border-t border-border-soft bg-surface-card px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <Button type="button" variant="outline" onClick={() => void clearFilters()} disabled={!hasFilters} className="h-auto min-h-11 min-w-0 px-3 font-bold">
               Limpar
-            </button>
-            <button type="button" onClick={() => setFiltersOpen(false)} className={cn(button, 'flex-1')}>
+            </Button>
+            <Button type="button" onClick={() => setFiltersOpen(false)} className="h-auto min-h-11 min-w-0 px-3 font-bold whitespace-normal">
               {list.isFetching ? 'Atualizando…' : `Ver ${total} ${total === 1 ? 'resultado' : 'resultados'}`}
-            </button>
+            </Button>
           </div>
         </SheetContent>
-      </Sheet>
-    </>
+    </Sheet>
   )
 }

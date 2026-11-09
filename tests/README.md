@@ -36,6 +36,13 @@ compra sem overflow interno (inclusive o botão de fechar) e rótulos longos de
 carteiras. Capturas das promoções e da revisão ficam nos artefatos de cada teste;
 esses checks complementam as baselines do primeiro viewport.
 
+`home-polish.spec.ts` cobre paginação intermediária em telas estreitas, rodapé
+livre da navegação fixa, áreas de toque das abas e filtros em retrato/paisagem.
+Confere cabeçalho e ações fixos no painel, rolagem das opções, retorno de foco e
+axe no estado aberto. `header.spec.ts` verifica alinhamento em
+1024/1264/1280/1440 px, busca sem deslocar o menu, navegação por hash com apenas
+o item correto ativo, teclado, login e acesso a favoritos.
+
 A análise axe verifica regras WCAG automatizáveis; não substitui teste manual
 de leitor de tela, teclado, zoom e comparação com o Figma.
 

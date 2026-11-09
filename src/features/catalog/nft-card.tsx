@@ -4,6 +4,7 @@ import type { NftSummary } from '@/api/contracts'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FavoriteButton } from '@/features/favorites/favorite-button'
 import { formatEth } from '@/lib/format'
+import { markSharedArt } from '@/lib/shared-art'
 import { NftImage } from './nft-image'
 
 const BADGE_LABELS = { rare: 'RARO', limited: 'OFERTA LIMITADA', featured: 'DESTAQUE' } as const
@@ -41,16 +42,18 @@ export function NftCard({ nft, priority = false, mobileColumn = 'left' }: { nft:
       </div>
 
       <div className="flex flex-col pl-2 lg:gap-3 lg:pl-0">
-        <h3 className="text-[8.5714cqw] text-cream lg:text-base lg:leading-4">
+        <h3 className="text-[clamp(12px,8.5714cqw,15px)] text-cream lg:text-base lg:leading-4">
           <Link
             to="/nft/$nftId"
             params={{ nftId: nft.id }}
+            viewTransition
+            onClick={(event) => markSharedArt(event.currentTarget)}
             className="after:absolute after:inset-0 after:z-0 focus-visible:outline-none after:focus-visible:rounded-[20px] after:focus-visible:outline-2 after:focus-visible:outline-copper-light lg:after:focus-visible:rounded-none"
           >
             {nft.name}
           </Link>
         </h3>
-        <p className="flex flex-wrap items-center gap-x-3 text-[9.1429cqw] leading-[9.1429cqw] lg:text-lg lg:leading-4">
+        <p className="flex flex-wrap items-center gap-x-3 text-[clamp(14px,9.1429cqw,16px)] leading-5 lg:text-lg lg:leading-4">
           <span className="font-bold text-copper-light">
             <span className="sr-only">Preço: </span>
             {formatEth(nft.priceEth)}

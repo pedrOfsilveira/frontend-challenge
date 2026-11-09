@@ -98,15 +98,25 @@ function Receipt({ order }: { order: Order }) {
       {/* Cabeçalho por status */}
       <header className="flex min-h-[156px] flex-col items-center justify-center gap-4 px-10 py-6 text-center">
         {order.status === 'confirmed' ? (
-          <img src={thankYou} alt="" width={65.16} height={80} />
+          // Momento de destaque: o selo carimba e uma onda cobre se espalha uma vez.
+          <span key="seal" aria-hidden className="relative grid place-items-center">
+            <span className="seal-ring absolute size-24 animate-seal-ring rounded-full border-2 border-copper" />
+            <img src={thankYou} alt="" width={65.16} height={80} className="seal-stamp relative animate-seal-stamp" />
+          </span>
         ) : order.status === 'pending' ? (
           <span aria-hidden className="size-14 rounded-full border-4 border-copper/30 border-t-copper motion-safe:animate-spin" />
         ) : (
-          <span aria-hidden className="grid size-14 place-items-center rounded-full border-2 border-[#f0805f] text-2xl font-bold text-[#f0805f]">
+          <span aria-hidden className="grid size-14 animate-rise-in place-items-center rounded-full border-2 border-[#f0805f] text-2xl font-bold text-[#f0805f]">
             !
           </span>
         )}
-        <h1 id="order-title" ref={heading} tabIndex={-1} className="text-base leading-5 font-bold text-sand-light outline-none">
+        <h1
+          key={order.status}
+          id="order-title"
+          ref={heading}
+          tabIndex={-1}
+          className={cn('text-base leading-5 font-bold text-sand-light outline-none', order.status !== 'pending' && 'animate-rise-in [animation-delay:180ms]')}
+        >
           {order.status === 'confirmed'
             ? 'Seus NFTs agora estão na sua carteira'
             : order.status === 'pending'

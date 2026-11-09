@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { useState } from 'react'
 import dots from '@/assets/figma/d-carousel-dots.svg'
 import linkedin from '@/assets/figma/d-share-linkedin.svg'
 import mail from '@/assets/figma/d-share-message.svg'
@@ -10,7 +11,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { NETWORK_LABELS } from '@/features/catalog/search'
 import { NftImage } from '@/features/catalog/nft-image'
 import { featuredNftsQuery, relatedNftsQuery } from '@/features/catalog/queries'
+import { Term } from '@/features/glossary/term'
 import { formatEth } from '@/lib/format'
+import { markSharedArt } from '@/lib/shared-art'
+import { useSlidingIndicator } from '@/lib/use-sliding-indicator'
 import { RatingStars } from './purchase-controls'
 
 const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-light'
@@ -37,7 +41,7 @@ export function ShareLinks({ name }: { name: string }) {
           target={link.href.startsWith('mailto:') ? undefined : '_blank'}
           rel="noopener noreferrer"
           aria-label={`Compartilhar por ${link.label}`}
-          className={`grid size-6 place-items-center rounded-sm hover:opacity-80 ${focusRing}`}
+          className={`grid size-11 place-items-center lg:size-6 rounded-sm hover:opacity-80 ${focusRing}`}
         >
           <img src={link.icon} alt="" width={link.w} height={link.h} />
         </a>
@@ -47,13 +51,15 @@ export function ShareLinks({ name }: { name: string }) {
 }
 
 const tabTrigger =
-  'h-auto flex-none rounded-none border-0 px-0 pb-3 text-[17px] leading-4 font-normal text-cream shadow-none after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] data-[state=active]:font-bold data-[state=active]:text-copper-light data-[state=active]:after:bg-copper dark:text-cream dark:data-[state=active]:text-copper-light hover:text-copper-light'
+  'h-auto min-w-0 flex-1 rounded-none border-0 px-0 py-3 text-sm leading-5 whitespace-normal [overflow-wrap:anywhere] sm:flex-none sm:pt-1 sm:pb-3 sm:text-[17px] sm:leading-4 sm:whitespace-nowrap font-normal text-cream shadow-none after:absolute after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-0 group-data-[orientation=horizontal]/tabs:after:h-[3px] transition-colors duration-150 data-[state=active]:font-bold data-[state=active]:text-copper-light dark:text-cream dark:data-[state=active]:text-copper-light hover:text-copper-light'
 
 /** Abas "Detalhes do NFT" / "Avaliações". As avaliações individuais não existem na API: mostra só o resumo. */
 export function NftDetailsTabs({ nft }: { nft: NftDetail }) {
+  const [tab, setTab] = useState('details')
+  const { container, indicator } = useSlidingIndicator<HTMLDivElement>('[data-state="active"]', tab)
   return (
-    <Tabs defaultValue="details" className="gap-3">
-      <TabsList variant="line" className="h-auto w-full flex-wrap justify-start gap-x-6 gap-y-3 rounded-none sm:gap-x-8 border-b border-copper/35 bg-transparent p-0">
+    <Tabs value={tab} onValueChange={setTab} className="min-w-0 gap-4">
+      <TabsList ref={container} variant="line" aria-label="Informações do NFT" className="relative w-full shrink-0 justify-start gap-3 rounded-none border-b border-copper/35 bg-transparent p-0 group-data-[orientation=horizontal]/tabs:h-auto sm:flex-wrap sm:gap-x-8">
         <TabsTrigger value="details" className={tabTrigger}>
           Detalhes do NFT
         </TabsTrigger>
@@ -61,8 +67,9 @@ export function NftDetailsTabs({ nft }: { nft: NftDetail }) {
           <span className="sm:hidden">Avaliações ({nft.rating.count})</span>
           <span className="hidden sm:inline">Avaliações de colecionadores ({nft.rating.count})</span>
         </TabsTrigger>
+        <span ref={indicator} aria-hidden className="tab-indicator h-[3px] bg-copper" />
       </TabsList>
-      <TabsContent value="details" className="flex flex-col gap-3 text-sm leading-6">
+      <TabsContent value="details" className="min-w-0 flex flex-col gap-3 text-sm leading-6 [overflow-wrap:anywhere]">
         <div className="flex flex-col gap-6 text-sand-light">
           {nft.story.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
@@ -71,11 +78,12 @@ export function NftDetailsTabs({ nft }: { nft: NftDetail }) {
         <dl className="flex flex-col gap-3">
           <div>
             <dt className="font-bold text-cream">Rede:</dt>
-            <dd className="text-sand-light">Cunhado na {NETWORK_LABELS[nft.network]} com procedência imutável e metadados armazenados no IPFS.</dd>
+            <dd className="text-sand-light">Cunhado na {NETWORK_LABELS[nft.network]} com <Term id="provenance">procedência</Term> imutável e metadados armazenados no{' '}
+              <Term id="ipfs">IPFS</Term>.</dd>
           </div>
           <div>
             <dt className="font-bold text-cream">Contrato:</dt>
-            <dd className="text-sand-light">{shortAddress(nft.contractAddress)} • Contrato inteligente ERC-721 verificado.</dd>
+            <dd className="text-sand-light">{shortAddress(nft.contractAddress)} • Contrato inteligente <Term id="erc721">ERC-721</Term> verificado.</dd>
           </div>
           <div>
             <dt className="font-bold text-cream">Direitos autorais:</dt>
@@ -85,8 +93,8 @@ export function NftDetailsTabs({ nft }: { nft: NftDetail }) {
           </div>
         </dl>
       </TabsContent>
-      <TabsContent value="reviews" className="flex flex-col gap-3 text-sm leading-6 text-sand-light">
-        <div className="flex items-center gap-2 text-cream">
+      <TabsContent value="reviews" className="min-w-0 flex flex-col gap-3 text-sm leading-6 [overflow-wrap:anywhere] text-sand-light">
+        <div className="flex flex-wrap items-center gap-2 text-cream">
           <RatingStars average={nft.rating.average} />
           <span>
             {nft.rating.average.replace('.', ',')} de 5 · {nft.rating.count} avaliações
@@ -128,7 +136,7 @@ export function RelatedNfts({ nftId, title = 'Mais desta coleção' }: { nftId?:
                   <NftImage src={item.image} alt="" sizes="(min-width: 1024px) 212px, 172px" className="aspect-square w-full rounded-[13px] object-cover" />
                 </div>
                 <h3 className="mt-3 text-[15px] text-cream">
-                  <Link to="/nft/$nftId" params={{ nftId: item.id }} className={`after:absolute after:inset-0 ${focusRing}`}>
+                  <Link to="/nft/$nftId" params={{ nftId: item.id }} viewTransition onClick={(event) => markSharedArt(event.currentTarget)} className={`after:absolute after:inset-0 ${focusRing}`}>
                     {item.name}
                   </Link>
                 </h3>

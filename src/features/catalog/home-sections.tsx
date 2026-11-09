@@ -10,6 +10,8 @@ import mobileHeroBg from '@/assets/figma/m-hero-mask.svg'
 import searchIcon from '@/assets/figma/m-search.svg'
 import promoMask from '@/assets/figma/promo-mask.svg'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
+import { SheetTrigger } from '@/components/ui/sheet'
 import { NftImage } from './nft-image'
 import { featuredNftsQuery } from './queries'
 
@@ -41,13 +43,9 @@ export function HomeHero() {
               Descubra NFTs selecionados de criadores emergentes e consagrados. Colecione arte digital rara, apoie artistas e tenha uma parte da cultura da internet.
             </p>
           </div>
-          <Link
-            to="/"
-            hash="catalogo"
-            className={`flex h-10 w-[140px] items-center justify-center rounded-md bg-copper pr-2 text-base leading-5 font-bold text-ink hover:bg-copper-light ${focusRing}`}
-          >
-            EXPLORAR
-          </Link>
+          <Button asChild className="h-10 w-[140px] text-base font-bold">
+            <Link to="/" hash="catalogo">EXPLORAR</Link>
+          </Button>
         </div>
         <img src={heroDots} alt="" aria-hidden width={40} height={8} />
       </div>
@@ -65,37 +63,37 @@ export function HomeHero() {
 /** Banner do Figma mobile (366 × 190). */
 export function MobileHero() {
   return (
-    <section aria-labelledby="mobile-hero-title" className="@container relative aspect-[366/190] overflow-hidden rounded-xl lg:hidden">
+    <section aria-labelledby="mobile-hero-title" className="@container relative aspect-[366/190] overflow-hidden rounded-xl sm:aspect-auto sm:h-[260px] lg:hidden">
       <img src={mobileHeroBg} alt="" aria-hidden className="absolute inset-0 size-full max-w-none" />
       {/* As medidas internas acompanham os 366 px do banner no Figma. */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-[4.3716cqw] px-[4.3716cqw]">
-        <div className="flex w-full items-center gap-[2.1858cqw]">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-[4.3716cqw] px-[4.3716cqw] sm:gap-4 sm:px-6">
+        <div className="flex w-full items-center gap-[2.1858cqw] sm:gap-6">
           <div className="flex min-w-0 flex-1 flex-col">
-            <div className="flex flex-col gap-[1.6393cqw]">
-              <p className="text-[3.2787cqw] leading-[4.3716cqw] font-medium text-cream">Bem-vindo à Kurio</p>
-              <h1 id="mobile-hero-title" className="text-[4.918cqw] leading-[7.9235cqw] font-bold text-cream">
+            <div className="flex flex-col gap-[1.6393cqw] sm:gap-2">
+              <p className="text-[3.2787cqw] leading-[4.3716cqw] font-medium text-cream sm:text-xs sm:leading-4">Bem-vindo à Kurio</p>
+              <h1 id="mobile-hero-title" className="text-[4.918cqw] leading-[7.9235cqw] font-bold text-cream sm:text-[28px] sm:leading-10 md:text-[32px]">
                 SEJA DONO DA<br />CULTURA DIGITAL
               </h1>
-              <p className="text-[3.2787cqw] leading-[4.918cqw] text-sand-light">Descubra NFTs selecionados de criadores do mundo todo.</p>
+              <p className="text-[3.2787cqw] leading-[4.918cqw] text-sand-light sm:text-sm sm:leading-6">Descubra NFTs selecionados de criadores do mundo todo.</p>
             </div>
-            <Link to="/" hash="catalogo" className={`flex items-center gap-[2.1858cqw] self-start rounded-sm text-[3.2787cqw] leading-[3.8251cqw] font-bold text-copper-light ${focusRing}`}>
+            <Link to="/" hash="catalogo" className={`relative flex items-center gap-[2.1858cqw] self-start rounded-sm text-[3.2787cqw] leading-[3.8251cqw] font-bold text-copper-light before:absolute before:inset-x-0 before:top-1/2 before:min-h-11 before:-translate-y-1/2 sm:gap-2 sm:text-sm sm:leading-5 ${focusRing}`}>
               EXPLORAR
-              <img src={mobileArrow} alt="" width={10} height={12} className="h-[3.2787cqw] w-[2.7322cqw] -rotate-90" />
+              <img src={mobileArrow} alt="" width={10} height={12} className="h-[3.2787cqw] w-[2.7322cqw] -rotate-90 sm:h-3 sm:w-2.5" />
             </Link>
           </div>
-          <div className="relative size-[37.7049cqw] shrink-0">
+          <div className="relative size-[37.7049cqw] shrink-0 sm:size-[200px]">
             <NftImage src={ART.shades} alt="" sizes="138px" priority className="size-full rounded-2xl object-cover" />
-            <NftImage src={ART.bucket} alt="" sizes="58px" priority className="absolute top-[24.0437cqw] left-[3.8251cqw] size-[15.847cqw] rounded-2xl object-cover" />
+            <NftImage src={ART.bucket} alt="" sizes="(min-width: 640px) 84px, 58px" priority className="absolute top-[24.0437cqw] left-[3.8251cqw] size-[15.847cqw] rounded-2xl object-cover sm:top-[128px] sm:left-5 sm:size-[84px]" />
           </div>
         </div>
-        <img src={mobileDots} alt="" aria-hidden width={33} height={7} className="h-[1.9126cqw] w-[9.0164cqw]" />
+        <img src={mobileDots} alt="" aria-hidden width={33} height={7} className="h-[1.9126cqw] w-[9.0164cqw] sm:h-[7px] sm:w-[33px]" />
       </div>
     </section>
   )
 }
 
 /** Barra de busca + botão de filtros (Figma mobile). A busca escreve `?q=` com um pequeno atraso. */
-export function MobileSearchBar({ q, onSearch, onOpenFilters, activeFilters }: { q: string | undefined; onSearch: (q: string | undefined) => void; onOpenFilters: () => void; activeFilters: number }) {
+export function MobileSearchBar({ q, onSearch, activeFilters }: { q: string | undefined; onSearch: (q: string | undefined) => void; activeFilters: number }) {
   const [value, setValue] = useState(q ?? '')
   // A URL mudou por fora (voltar, limpar busca): o campo acompanha.
   const [syncedQ, setSyncedQ] = useState(q)
@@ -112,7 +110,7 @@ export function MobileSearchBar({ q, onSearch, onOpenFilters, activeFilters }: {
 
   return (
     <div className="flex gap-2 lg:hidden">
-      <form role="search" className="relative flex-1" onSubmit={(event) => (event.preventDefault(), onSearch(value.trim() || undefined))}>
+      <form role="search" className="relative min-w-0 flex-1" onSubmit={(event) => (event.preventDefault(), onSearch(value.trim() || undefined))}>
         <label htmlFor="mobile-search" className="sr-only">
           Buscar NFTs
         </label>
@@ -122,14 +120,14 @@ export function MobileSearchBar({ q, onSearch, onOpenFilters, activeFilters }: {
           type="search"
           value={value}
           onChange={(event) => setValue(event.target.value)}
-          placeholder="Explorar coleções"
+          placeholder="Buscar NFTs"
           maxLength={80}
-          className="h-[45px] w-full rounded-[10px] bg-surface-card pr-3 pl-[42px] text-sm leading-4 font-bold text-cream placeholder:text-sand focus-visible:outline-2 focus-visible:outline-copper-light"
+          className="h-[45px] w-full rounded-[10px] bg-surface-card pr-3 pl-[42px] text-base leading-5 font-bold text-cream placeholder:text-sand focus-visible:outline-2 focus-visible:outline-copper-light sm:text-sm"
         />
       </form>
+      <SheetTrigger asChild>
       <button
         type="button"
-        onClick={onOpenFilters}
         aria-label={activeFilters ? `Filtros (${activeFilters} ativos)` : 'Filtros'}
         className={`relative grid size-[45px] shrink-0 place-items-center rounded-[14px] bg-linear-[137deg] from-copper/45 from-25% to-copper ${focusRing}`}
       >
@@ -140,6 +138,7 @@ export function MobileSearchBar({ q, onSearch, onOpenFilters, activeFilters }: {
           </span>
         )}
       </button>
+      </SheetTrigger>
     </div>
   )
 }
@@ -154,7 +153,7 @@ export function FeaturedBanner() {
       <div className="flex flex-col gap-4">
         <h2 id="featured-title" className="flex flex-col items-center gap-4">
           <span className="w-full px-5 text-heading leading-8 font-bold text-copper-light">NFT EM DESTAQUE</span>
-          <span className="w-full px-5 text-center text-[22px] leading-4 font-bold text-cream">OFERTA LIMITADA</span>
+          <span className="w-full px-5 text-center text-lg leading-6 font-bold text-cream">OFERTA LIMITADA</span>
         </h2>
         {isPending ? (
           <Skeleton className="h-[368px] w-full rounded-[22px]" />
@@ -165,7 +164,7 @@ export function FeaturedBanner() {
         ) : null}
       </div>
       {/* Detalhes decorativos do Figma. */}
-      <span aria-hidden className="absolute top-[299px] left-4 size-[22px] rounded-[7px] border-2 border-[#46a358] opacity-20" />
+      <span aria-hidden className="absolute top-[299px] left-4 size-[22px] rounded-[7px] border-2 border-copper opacity-20" />
       <span aria-hidden className="absolute top-[343px] left-[248px] size-[45px] rounded-[29px] bg-linear-[145deg] from-copper/30 from-46% to-copper/0" />
       <span aria-hidden className="absolute top-[105px] left-[38px] size-[15px] rounded-[29px] bg-linear-[145deg] from-copper/30 from-46% to-copper/0" />
     </section>
@@ -192,26 +191,23 @@ export function Promos() {
   return (
     <section aria-label="Destaques do mercado" className="grid gap-7 lg:grid-cols-2">
       {PROMOS.map((promo) => (
-        <article key={promo.title[0]} className="relative grid min-w-0 overflow-hidden rounded-lg bg-surface-card sm:min-h-[250px] sm:grid-cols-[49.8%_minmax(0,1fr)]">
+        <article key={promo.title[0]} className="relative grid min-w-0 overflow-hidden rounded-lg bg-surface-card sm:min-h-[250px] sm:grid-cols-[44%_minmax(0,1fr)]">
           <div className="relative h-[220px] sm:h-auto sm:min-h-[250px]">
             <img src={promo.art} alt="" width={292} height={250} loading="lazy" decoding="async" className="absolute inset-0 size-full rounded-[18px] object-cover" />
           </div>
-          <div className="relative z-10 flex min-w-0 flex-col items-start gap-3 p-6 text-left sm:items-end sm:gap-[9px] sm:pr-[30px] sm:pl-0 sm:text-right">
+          <div className="relative z-10 flex min-w-0 flex-col items-start gap-3 p-6 text-left sm:items-end sm:gap-3 sm:px-6 sm:text-right">
             <h2 className="text-lg leading-6 font-bold text-cream">
               {promo.title[0]}
               <br />
               {promo.title[1]}
             </h2>
             <p className="max-w-[263px] text-sm leading-6 text-sand-light">{promo.text}</p>
-            <Link
-              to="/"
-              search={promo.search}
-              hash="catalogo"
-              className={`mt-auto flex min-h-10 w-[140px] max-w-full shrink-0 items-center justify-center gap-0 rounded-md bg-copper text-sm leading-5 font-medium text-ink hover:bg-copper-light ${focusRing}`}
-            >
-              Explorar
-              <img src={arrowRight} alt="" width={18} height={18} className="size-[18px] -rotate-90 p-[3.5px_4.5px]" />
-            </Link>
+            <Button asChild className="mt-auto h-auto min-h-11 w-full font-bold sm:w-[140px]">
+              <Link to="/" search={promo.search} hash="catalogo">
+                Explorar
+                <img src={arrowRight} alt="" width={18} height={18} className="size-[18px] -rotate-90 p-[3.5px_4.5px]" />
+              </Link>
+            </Button>
           </div>
           <img src={promoMask} alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full max-w-none" />
         </article>
@@ -230,21 +226,21 @@ const POSTS = [
 /** Blog editorial: conteúdo estático (as páginas de artigo estão fora do escopo, então não há link). */
 export function Blog() {
   return (
-    <section aria-labelledby="blog-title" className="flex flex-col items-center gap-10">
+    <section id="aprenda" aria-labelledby="blog-title" className="flex scroll-mt-6 flex-col items-center gap-6 lg:gap-10">
       <div className="flex flex-col gap-3 text-center">
-        <h2 id="blog-title" className="text-[28px] font-bold text-cream-light">
+        <h2 id="blog-title" className="text-2xl leading-8 font-bold text-cream-light sm:text-[28px]">
           Diário da Cunhagem
         </h2>
-        <p className="text-sm text-sand-light">Histórias, guias e insights para colecionadores sobre o universo da propriedade digital.</p>
+        <p className="max-w-[65ch] text-sm leading-6 text-sand-light">Histórias, guias e insights para colecionadores sobre o universo da propriedade digital.</p>
       </div>
       <div className="grid w-full gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-[repeat(4,268px)]">
         {POSTS.map((post) => (
           <article key={post.title} className="flex flex-col overflow-hidden rounded-lg bg-surface-card">
             <img src={post.art.replace('.webp', '-640.webp')} alt="" width={268} height={195} loading="lazy" decoding="async" className="h-[195px] w-full object-cover" />
-            <div className="flex flex-1 flex-col gap-2 px-4 pt-3 pb-4">
-              <p className="text-xs leading-4 font-medium whitespace-pre-wrap text-sand-light">{`${post.date}  |  Leitura de ${post.read}`}</p>
-              <h3 className="text-base font-bold text-cream-light">{post.title}</h3>
-              <p className="text-xs leading-4 font-medium text-sand-light">{post.text}</p>
+            <div className="flex flex-1 flex-col gap-2 p-6 lg:px-4 lg:pt-3 lg:pb-4">
+              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs leading-5 font-medium text-sand-light"><span>{post.date}</span><span aria-hidden>·</span><span>Leitura de {post.read}</span></p>
+              <h3 className="text-base leading-6 font-bold text-cream-light">{post.title}</h3>
+              <p className="text-sm leading-6 text-sand-light lg:text-xs lg:leading-5">{post.text}</p>
             </div>
           </article>
         ))}

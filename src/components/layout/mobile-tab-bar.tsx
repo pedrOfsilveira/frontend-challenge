@@ -12,9 +12,11 @@ import scanTopLeft from '@/assets/figma/m-scan-6.svg'
 import shop from '@/assets/figma/m-shop.svg'
 import user from '@/assets/figma/m-user.svg'
 import { MaskIcon } from '@/components/mask-icon'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useCartCount } from '@/features/cart/use-cart-count'
+import { useChangeCount } from '@/lib/use-change-count'
 
-export type TabBarSection = 'home' | 'cart' | 'account'
+export type TabBarSection = 'home' | 'favorites' | 'cart' | 'account'
 
 /** Peças do ícone central, nas posições do Figma relativas ao botão de 65 px. */
 const SCAN = [
@@ -33,6 +35,7 @@ const item = 'absolute top-[71px] grid size-11 -translate-x-1/2 -translate-y-3 p
  */
 export function MobileTabBar({ active }: { active: TabBarSection }) {
   const count = useCartCount()
+  const countChange = useChangeCount(count)
   const tone = (section: TabBarSection) => (active === section ? 'text-copper-light' : 'text-sand-light')
 
   return (
@@ -42,22 +45,34 @@ export function MobileTabBar({ active }: { active: TabBarSection }) {
       <Link to="/" aria-label="Início" aria-current={active === 'home' ? 'page' : undefined} className={cn(item, 'left-[11.1%]', tone('home'))}>
         <MaskIcon src={home} width={16} height={17} />
       </Link>
-      <button type="button" disabled aria-label="Favoritos indisponíveis nesta demonstração" className={cn(item, 'left-[28.5%] cursor-default text-sand-light')}>
-        <MaskIcon src={heart} width={20} height={18} className="opacity-40" />
-        <span className="absolute top-full text-[9px] leading-3 whitespace-nowrap">Indisponível</span>
-      </button>
-
-      <Link to="/" hash="catalogo" aria-label="Explorar catálogo" className="absolute top-0 left-1/2 size-[65px] -translate-x-1/2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-light">
-        <img src={fab} alt="" width={65} height={65} className="absolute inset-0" />
-        {SCAN.map((piece) => (
-          <img key={piece.src} src={piece.src} alt="" className="absolute max-w-none" style={{ left: piece.left, top: piece.top, width: piece.w, height: piece.h }} />
-        ))}
+      <Link to="/favoritos" aria-label="Favoritos" aria-current={active === 'favorites' ? 'page' : undefined} className={cn(item, 'left-[28.5%]', tone('favorites'))}>
+        <MaskIcon src={heart} width={20} height={18} />
       </Link>
+
+      <Dialog>
+        <DialogTrigger asChild>
+          <button type="button" aria-label="Scanner indisponível" className="absolute top-0 left-1/2 size-[65px] -translate-x-1/2 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-light">
+            <img src={fab} alt="" width={65} height={65} className="absolute inset-0" />
+            {SCAN.map((piece) => (
+              <img key={piece.src} src={piece.src} alt="" className="absolute max-w-none" style={{ left: piece.left, top: piece.top, width: piece.w, height: piece.h }} />
+            ))}
+          </button>
+        </DialogTrigger>
+        <DialogContent showCloseButton={false} className="border-border bg-surface-card text-cream">
+          <DialogTitle className="text-lg leading-7 font-bold">Scanner indisponível</DialogTitle>
+          <DialogDescription className="text-sm leading-6 text-sand-light">
+            O scanner não está disponível nesta demonstração.
+          </DialogDescription>
+          <DialogClose asChild>
+            <button type="button" className="min-h-11 justify-self-end rounded-md bg-copper px-5 py-3 text-sm font-bold text-ink hover:bg-copper-light focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-copper-light">Entendi</button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
 
       <Link to="/carrinho" aria-label={`Carrinho, ${count} ${count === 1 ? 'item' : 'itens'}`} className={cn(item, 'left-[72.9%]', tone('cart'))}>
         <MaskIcon src={shop} width={20} height={20} />
         {count > 0 && (
-          <span aria-hidden className="absolute top-1 right-0.5 grid size-4 place-items-center rounded-full bg-copper text-[9px] font-bold text-ink">
+          <span key={countChange.count} aria-hidden className={cn('absolute top-1 right-0.5 grid size-4 place-items-center rounded-full bg-copper text-[9px] font-bold text-ink', countChange.changed && 'animate-tick motion-scale')}>
             {count > 9 ? '9+' : count}
           </span>
         )}
