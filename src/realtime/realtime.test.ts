@@ -5,6 +5,7 @@ import { queryKeys, type PrivateScope } from '@/api/query-keys'
 import { keepNewestVersion } from '@/lib/versioned'
 import { applyRealtimeEvent, type ApplyContext, type RealtimeNotice } from './apply'
 import { createLedger } from './ledger'
+import { createRefresher, type Refresher } from './refresh'
 
 const NFT = 'emerald-ape-042'
 const EDITION = 'emerald-ape-042-1-50'
@@ -47,11 +48,15 @@ const orderEvent = (status: Order['status'], version: number, userId = 'user_nov
 let queryClient: QueryClient
 let ctx: ApplyContext
 let notices: RealtimeNotice[]
+let refresher: Refresher | undefined
 
 beforeEach(() => {
   queryClient = new QueryClient({ defaultOptions: { queries: { structuralSharing: keepNewestVersion } } })
   notices = []
-  ctx = { queryClient, ledger: createLedger(), userId: 'user_nova', scope: SCOPE, notify: (n) => notices.push(n) }
+  refresher?.dispose()
+  const current = createRefresher(queryClient)
+  refresher = current
+  ctx = { queryClient, ledger: createLedger(), userId: 'user_nova', scope: SCOPE, notify: (n) => notices.push(n), refresh: (filters) => current.refresh(filters) }
 })
 
 describe('ledger', () => {

@@ -1,4 +1,4 @@
-import type { QueryClient } from '@tanstack/react-query'
+import type { Query, QueryClient, QueryFilters } from '@tanstack/react-query'
 import type { Cart, NftDetail, NftSummary, NftUpdatedEvent, Order, OrderUpdatedEvent, RealtimeEvent } from '@/api/contracts'
 import { queryKeys, type PrivateScope } from '@/api/query-keys'
 import type { Ledger } from './ledger'
@@ -22,6 +22,11 @@ export interface ApplyContext {
   userId: string | null
   scope: PrivateScope
   notify: (notice: RealtimeNotice) => void
+  /**
+   * Busca no REST o estado atual das queries do filtro, sem reaproveitar resposta em voo
+   * (ver `createRefresher`). É por aqui que o servidor continua sendo a fonte da verdade.
+   */
+  refresh: (filters: QueryFilters) => void
 }
 
 const TERMINAL: ReadonlySet<Order['status']> = new Set(['confirmed', 'declined'])
@@ -29,6 +34,9 @@ const TERMINAL: ReadonlySet<Order['status']> = new Set(['confirmed', 'declined']
 type WithItems = { items: NftSummary[] }
 const hasItems = (data: unknown): data is WithItems =>
   typeof data === 'object' && data !== null && Array.isArray((data as { items?: unknown }).items)
+
+const isList = (query: Query) => query.queryKey[1] === queryKeys.nfts.lists()[1]
+const isLoading = (query: Query) => query.state.data === undefined && query.state.fetchStatus !== 'idle'
 
 /** Maior versão do NFT entre as entradas do cache (detalhe, listas, destaques, relacionados). */
 function cachedNftVersion(queryClient: QueryClient, nftId: string) {
@@ -65,12 +73,18 @@ function applyNftUpdated(event: NftUpdatedEvent, ctx: ApplyContext) {
   queryClient.setQueriesData<WithItems>({ queryKey: queryKeys.nfts.all }, (old) =>
     hasItems(old) && old.items.some((nft) => nft.id === nftId) ? { ...old, items: old.items.map(patchSummary) } : old,
   )
-  // Filtros e ordenação por preço podem ter mudado de resultado: a lista fica velha, sem refetch imediato
-  // (a página não "pula" debaixo do usuário; refaz na próxima vez que a lista montar).
-  void queryClient.invalidateQueries({ queryKey: queryKeys.nfts.lists(), refetchType: 'none' })
+  // O patch acima só corrige o preço exibido. Quem entra ou sai de um filtro de preço, a ordem,
+  // o total, as páginas e a faixa de preço das facetas são do servidor: toda listagem (contenha
+  // ou não este NFT) volta ao REST. As ativas refazem já; as outras, quando montarem.
+  // Detalhe/destaques/relacionados ainda sem dados não tinham onde aplicar o evento, e a resposta
+  // em voo pode ser de antes dele: refazem quando ela chegar.
+  ctx.refresh({ queryKey: queryKeys.nfts.all, predicate: (query) => isList(query) || isLoading(query) })
 
   // Carrinho: o preço/estoque exibidos mudam já, e a cotação (o valor a pagar) é refeita pelo servidor.
   const cartKey = queryKeys.private.cart(ctx.scope)
+  // Carrinho em voo pode ter sido calculado antes do evento (e a versão do carrinho não muda com o
+  // preço do NFT, então o `keepNewestVersion` não o barraria): pede de novo.
+  if (queryClient.getQueryState(cartKey)?.fetchStatus !== 'idle') ctx.refresh({ queryKey: cartKey, exact: true })
   const cart = queryClient.getQueryData<Cart>(cartKey)
   const touched = cart?.items.filter((line) => line.nftId === nftId) ?? []
   if (!cart || touched.length === 0) return
@@ -119,13 +133,15 @@ function applyOrderUpdated(event: OrderUpdatedEvent, ctx: ApplyContext) {
       updatedAt: event.occurredAt,
     })
   }
-  // Sem o pedido no cache (ex.: tela de pedido ainda carregando), o refetch traz o estado certo.
-  void queryClient.invalidateQueries({ queryKey: queryKeys.private.orders(scope), refetchType: cached ? 'none' : 'active' })
+  if (cached) void queryClient.invalidateQueries({ queryKey: queryKeys.private.orders(scope), refetchType: 'none' })
+  // Sem o pedido no cache (ex.: tela de pedido ainda carregando, com a resposta de antes do evento
+  // em voo), o REST traz o estado certo: refaz já ou assim que a requisição em voo terminar.
+  else ctx.refresh({ queryKey: queryKeys.private.orders(scope) })
 
   if (TERMINAL.has(event.data.status)) {
     // Confirmado: o servidor tirou os itens comprados do carrinho; recusado: o estoque reservado voltou.
-    void queryClient.invalidateQueries({ queryKey: queryKeys.private.cart(scope) })
-    void queryClient.invalidateQueries({ queryKey: queryKeys.nfts.all })
+    ctx.refresh({ queryKey: queryKeys.private.cart(scope) })
+    ctx.refresh({ queryKey: queryKeys.nfts.all })
   }
   ctx.notify({ kind: 'order-status', orderId: event.resource.id, status: event.data.status })
 }
